@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Prevent loop if already accessing /public
+    RewriteCond %{REQUEST_URI} !^/public/
+
+    # Send all requests into the public folder
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
