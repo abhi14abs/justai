@@ -282,7 +282,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'order_number' => 'required|string',
             'razorpay_payment_id' => 'required|string',
-            'razorpay_order_id' => 'required|string',
+            'razorpay_order_id' => 'nullable|string',
             'razorpay_signature' => 'nullable|string'
         ]);
 

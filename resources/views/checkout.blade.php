@@ -309,31 +309,51 @@
                     currency: orderData.currency,
                     name: 'Postryx AI',
                     description: `${plan.toUpperCase()} Plan Subscription`,
-                    order_id: orderData.razorpay_order_id,
                     prefill: {
                         name: orderData.customer_name,
                         email: orderData.customer_email
                     },
                     theme: { color: '#6366f1' },
+                    modal: {
+                        ondismiss: function() {
+                            Postryx.showToast('Payment window closed.', 'info');
+                        }
+                    },
                     handler: async function (response) {
                         Postryx.showToast('Verifying payment signature...');
-                        const verifyRes = await fetch('/api/checkout/razorpay/verify', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                order_number: currentOrderNumber,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_signature: response.razorpay_signature
-                            })
-                        });
-                        const verifyData = await verifyRes.json();
-                        if (verifyData.success) {
-                            window.location.href = verifyData.redirect_url;
+                        try {
+                            const verifyRes = await fetch('/api/checkout/razorpay/verify', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    order_number: currentOrderNumber,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_order_id: response.razorpay_order_id || orderData.razorpay_order_id || '',
+                                    razorpay_signature: response.razorpay_signature || ''
+                                })
+                            });
+                            const verifyData = await verifyRes.json();
+                            if (verifyData.success) {
+                                Postryx.showToast('Payment successful! Redirecting...', 'success');
+                                window.location.href = verifyData.redirect_url;
+                            } else {
+                                Postryx.showToast(verifyData.error || 'Payment verification failed', 'error');
+                            }
+                        } catch (err) {
+                            console.error('Verification error:', err);
+                            Postryx.showToast('Verification failed. Please contact support.', 'error');
                         }
                     }
                 };
+
+                if (orderData.razorpay_order_id) {
+                    options.order_id = orderData.razorpay_order_id;
+                }
+
                 const rzp = new Razorpay(options);
+                rzp.on('payment.failed', function (response) {
+                    Postryx.showToast(response.error.description || 'Payment Failed', 'error');
+                });
                 rzp.open();
             } else if (gateway === 'upi_qr') {
                 document.getElementById('upi-qr-box').style.display = 'block';

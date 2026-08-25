@@ -153,8 +153,8 @@
         <h3 style="font-size: 18px; color: #fff; margin-bottom: 16px;">Commissions Log (30% Recurring)</h3>
         
         @if($commissionOrders->count() > 0)
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <div class="table-responsive" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 650px;">
                 <thead>
                     <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted);">
                         <th style="padding: 12px 16px;">Order #</th>

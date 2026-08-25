@@ -111,6 +111,9 @@
             color: var(--text-primary);
             font-family: inherit;
             margin-top: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
         }
 
         .dataTables_wrapper .dataTables_length,
@@ -205,20 +208,26 @@
 
     <div class="admin-layout">
         
+        {{-- Mobile Overlay --}}
+        <div id="admin-sidebar-overlay" class="mobile-drawer-overlay"></div>
+
         {{-- Fixed Admin Sidebar --}}
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="admin-sidebar">
             
-            {{-- Brand Logo --}}
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 0 8px;">
-                <img src="{{ asset('images/logo.png') }}" alt="Postryx Admin Logo" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); border: 1px solid rgba(99, 102, 241, 0.4);">
-                <div class="brand-text" style="display: flex; flex-direction: column;">
-                    <span style="font-family: var(--font-display); font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.03em;">POSTRYX<span style="color: #fbbf24;">.ADMIN</span></span>
-                    <span style="font-size: 10px; color: #fbbf24; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-top: -3px;">Master Control Center</span>
+            {{-- Brand Logo & Mobile Close --}}
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding: 0 8px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="{{ asset('images/logo.png') }}" alt="Postryx Admin Logo" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); border: 1px solid rgba(99, 102, 241, 0.4);">
+                    <div class="brand-text" style="display: flex; flex-direction: column;">
+                        <span style="font-family: var(--font-display); font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.03em;">POSTRYX<span style="color: #fbbf24;">.ADMIN</span></span>
+                        <span style="font-size: 10px; color: #fbbf24; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-top: -3px;">Master Control Center</span>
+                    </div>
                 </div>
+                <button id="admin-sidebar-close" class="mobile-drawer-close mobile-menu-toggle" style="display: none; width: 32px; height: 32px; font-size: 16px;">&times;</button>
             </div>
 
             {{-- Navigation Links --}}
-            <nav style="display: flex; flex-direction: column; gap: 2px; flex: 1;">
+            <nav style="display: flex; flex-direction: column; gap: 2px; flex: 1; overflow-y: auto;">
                 
                 <div class="nav-label" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 12px 6px;">
                     Analytics &amp; Revenue
@@ -298,37 +307,39 @@
             {{-- Top Header Bar --}}
             <header class="admin-topbar">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="badge-pill-amber" style="font-size: 11px;">👑 Super Admin Mode</span>
+                    <button id="admin-mobile-toggle" class="mobile-menu-toggle" style="display: none; padding: 6px 10px; font-size: 18px;" aria-label="Toggle Navigation">
+                        ☰
+                    </button>
+                    <span class="badge-pill-amber" style="font-size: 11px;">👑 Super Admin</span>
                     <div style="font-size: 13px; color: var(--text-muted);" id="admin-live-clock">--:--:--</div>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f59e0b); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #000; font-size: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f59e0b); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #000; font-size: 13px;">
                             {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 1)) }}
                         </div>
-                        <div style="display: flex; flex-direction: column;">
-                            <span style="font-size: 13px; font-weight: 700; color: #fff;">{{ Auth::user()->name ?? 'Administrator' }}</span>
-                            <span style="font-size: 11px; color: #fbbf24;">Master Admin</span>
+                        <div style="display: flex; flex-direction: column;" class="nav-label">
+                            <span style="font-size: 12px; font-weight: 700; color: #fff;">{{ Auth::user()->name ?? 'Admin' }}</span>
                         </div>
                     </div>
 
                     <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                         @csrf
-                        <button type="submit" class="btn-secondary" style="padding: 7px 14px; font-size: 12px;">Logout</button>
+                        <button type="submit" class="btn-secondary" style="padding: 6px 12px; font-size: 11px;">Logout</button>
                     </form>
                 </div>
             </header>
 
             {{-- Flash Alert Container --}}
             @if(session('success'))
-            <div style="margin: 24px 32px 0; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 14px 20px; color: #6ee7b7; font-size: 14px; font-weight: 600;">
+            <div style="margin: 20px 20px 0; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 14px 20px; color: #6ee7b7; font-size: 14px; font-weight: 600;">
                 {{ session('success') }}
             </div>
             @endif
 
             @if(session('error'))
-            <div style="margin: 24px 32px 0; background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); border-radius: 12px; padding: 14px 20px; color: #fca5a5; font-size: 14px; font-weight: 600;">
+            <div style="margin: 20px 20px 0; background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4); border-radius: 12px; padding: 14px 20px; color: #fca5a5; font-size: 14px; font-weight: 600;">
                 {{ session('error') }}
             </div>
             @endif
@@ -350,10 +361,32 @@
         function updateClock() {
             const now = new Date();
             const el = document.getElementById('admin-live-clock');
-            if (el) el.textContent = now.toLocaleTimeString() + ' (' + Intl.DateTimeFormat().resolvedOptions().timeZone + ')';
+            if (el) el.textContent = now.toLocaleTimeString();
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Admin Mobile Sidebar Toggle
+        const adminToggle = document.getElementById('admin-mobile-toggle');
+        const adminClose = document.getElementById('admin-sidebar-close');
+        const adminSidebar = document.getElementById('admin-sidebar');
+        const adminOverlay = document.getElementById('admin-sidebar-overlay');
+
+        function openAdminSidebar() {
+            if (adminSidebar) adminSidebar.classList.add('open');
+            if (adminOverlay) adminOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAdminSidebar() {
+            if (adminSidebar) adminSidebar.classList.remove('open');
+            if (adminOverlay) adminOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (adminToggle) adminToggle.addEventListener('click', openAdminSidebar);
+        if (adminClose) adminClose.addEventListener('click', closeAdminSidebar);
+        if (adminOverlay) adminOverlay.addEventListener('click', closeAdminSidebar);
 
         // Universal DataTable Init
         $(document).ready(function() {

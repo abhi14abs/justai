@@ -112,18 +112,18 @@
 
     {{-- Navigation Bar --}}
     <header class="postryx-nav">
-        <div style="max-width: 1280px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="max-width: 1280px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
             {{-- Brand Logo --}}
-            <a href="{{ route('home') }}" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
-                <img src="{{ asset('images/logo.png') }}" alt="Postryx AI Logo" style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover; box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); border: 1px solid rgba(99, 102, 241, 0.4);">
+            <a href="{{ route('home') }}" style="display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0;">
+                <img src="{{ asset('images/logo.png') }}" alt="Postryx AI Logo" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); border: 1px solid rgba(99, 102, 241, 0.4);">
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-family: var(--font-display); font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: -0.03em;">POSTRYX<span style="color: #38bdf8;">.IN</span></span>
-                    <span style="font-size: 10px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-top: -3px;">Viral AI Engine</span>
+                    <span style="font-family: var(--font-display); font-size: 20px; font-weight: 900; color: #ffffff; letter-spacing: -0.03em;">POSTRYX<span style="color: #38bdf8;">.IN</span></span>
+                    <span style="font-size: 9px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-top: -3px;">Viral AI Engine</span>
                 </div>
             </a>
 
-            {{-- Nav Links --}}
-            <nav style="display: flex; align-items: center; gap: 8px;">
+            {{-- Desktop Nav Links --}}
+            <nav class="nav-desktop" style="display: flex; align-items: center; gap: 8px;">
                 <div style="position: relative;" class="nav-dropdown-wrapper">
                     <button class="nav-link" style="display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer;">
                         AI Tools
@@ -174,8 +174,8 @@
                 <a href="{{ route('affiliate') }}" class="nav-link {{ request()->routeIs('affiliate') ? 'active' : '' }}">Affiliates (30%)</a>
             </nav>
 
-            {{-- Actions & Auth Navigation --}}
-            <div style="display: flex; align-items: center; gap: 10px;">
+            {{-- Desktop Actions & Auth Navigation --}}
+            <div class="nav-actions-desktop" style="display: flex; align-items: center; gap: 10px;">
                 @if(Auth::check())
                     <a href="{{ route('dashboard') }}" class="nav-link" style="color: #38bdf8; font-weight: 600;">
                         Dashboard
@@ -204,8 +204,98 @@
                     <span>Launch Studio ⚡</span>
                 </a>
             </div>
+
+            {{-- Mobile Menu Trigger Button --}}
+            <button id="mobile-menu-btn" class="mobile-menu-toggle" aria-label="Toggle Menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
         </div>
     </header>
+
+    {{-- Mobile Overlay Backdrop --}}
+    <div id="mobile-drawer-overlay" class="mobile-drawer-overlay"></div>
+
+    {{-- Mobile Sliding Drawer Menu --}}
+    <div id="mobile-drawer" class="mobile-drawer">
+        <div class="mobile-drawer-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="{{ asset('images/logo.png') }}" alt="Postryx AI Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover;">
+                <span style="font-family: var(--font-display); font-size: 18px; font-weight: 900; color: #ffffff;">POSTRYX<span style="color: #38bdf8;">.IN</span></span>
+            </div>
+            <button id="mobile-menu-close" class="mobile-drawer-close" aria-label="Close Menu">&times;</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+            {{-- Mobile AI Tools Accordion --}}
+            <div class="mobile-tools-accordion">
+                <div class="mobile-tools-header" onclick="toggleMobileTools(this)">
+                    <span>⚡ AI Tools Suite</span>
+                    <span id="mobile-tools-icon">▼</span>
+                </div>
+                <div class="mobile-tools-content" id="mobile-tools-list">
+                    <a href="{{ route('tool.show', 'linkedin-post-generator') }}" class="mobile-tools-sublink">
+                        <span style="color:#60a5fa;">✦</span> LinkedIn Viral Post
+                    </a>
+                    <a href="{{ route('tool.show', 'viral-tweet-thread-generator') }}" class="mobile-tools-sublink">
+                        <span style="color:#38bdf8;">✦</span> Twitter / X Thread Maker
+                    </a>
+                    <a href="{{ route('tool.show', 'ai-seo-blog-writer') }}" class="mobile-tools-sublink">
+                        <span style="color:#34d399;">✦</span> Programmatic SEO Writer
+                    </a>
+                    <a href="{{ route('tool.show', 'ai-content-humanizer') }}" class="mobile-tools-sublink">
+                        <span style="color:#fbbf24;">✦</span> AI Content Humanizer
+                    </a>
+                    <a href="{{ route('tool.show', 'viral-headline-analyzer') }}" class="mobile-tools-sublink">
+                        <span style="color:#ec4899;">✦</span> Headline &amp; Hook Scorecard
+                    </a>
+                    <a href="{{ route('tool.show', 'content-repurposer') }}" class="mobile-tools-sublink">
+                        <span style="color:#a855f7;">✦</span> 1-Click Repurposer
+                    </a>
+                </div>
+            </div>
+
+            <a href="{{ route('pricing') }}" class="mobile-nav-link {{ request()->routeIs('pricing') ? 'active' : '' }}">
+                💰 Pricing &amp; ROI
+            </a>
+            <a href="{{ route('blog.index') }}" class="mobile-nav-link {{ request()->routeIs('blog.*') ? 'active' : '' }}">
+                📚 SEO Guides
+            </a>
+            <a href="{{ route('affiliate') }}" class="mobile-nav-link {{ request()->routeIs('affiliate') ? 'active' : '' }}">
+                🤝 Affiliates (Earn 30%)
+            </a>
+
+            <div style="border-top: 1px solid var(--border-subtle); margin: 16px 0 12px;"></div>
+
+            @if(Auth::check())
+                <a href="{{ route('dashboard') }}" class="mobile-nav-link" style="color: #38bdf8;">
+                    📊 Member Dashboard
+                </a>
+                <a href="{{ route('affiliate.dashboard') }}" class="mobile-nav-link" style="color: #a855f7;">
+                    🤝 Partner Hub (30%)
+                </a>
+                @if(Auth::user() && Auth::user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="mobile-nav-link" style="color: #fbbf24;">
+                    👑 Admin Console
+                </a>
+                @endif
+                <form action="{{ route('logout') }}" method="POST" style="margin-top: 8px;">
+                    @csrf
+                    <button type="submit" class="btn-secondary" style="width: 100%; padding: 10px; font-size: 13px;">Logout</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="btn-secondary" style="width: 100%; text-align: center; justify-content: center; margin-bottom: 8px; padding: 11px;">
+                    Log In
+                </a>
+                <a href="{{ route('register') }}" class="btn-primary" style="width: 100%; text-align: center; justify-content: center; margin-bottom: 8px; padding: 11px;">
+                    Sign Up Free
+                </a>
+            @endif
+
+            <a href="{{ route('home') }}#studio-section" class="btn-glow-cyan btn-primary" style="width: 100%; margin-top: auto; padding: 12px; font-size: 14px; font-weight: 700; text-align: center; justify-content: center;">
+                Launch Studio ⚡
+            </a>
+        </div>
+    </div>
 
     {{-- Main Content --}}
     <main>
@@ -293,6 +383,16 @@
 
     {{-- Interactive Dropdown & UI Scripts --}}
     <script>
+        function toggleMobileTools(btn) {
+            const content = document.getElementById('mobile-tools-list');
+            const icon = document.getElementById('mobile-tools-icon');
+            if (content) {
+                const isOpen = content.classList.contains('open');
+                content.classList.toggle('open', !isOpen);
+                if (icon) icon.textContent = isOpen ? '▼' : '▲';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const dropdownBtn = document.querySelector('.nav-dropdown-wrapper button');
             const dropdownMenu = document.getElementById('nav-tools-menu');
@@ -308,6 +408,28 @@
                     dropdownMenu.style.display = 'none';
                 });
             }
+
+            // Mobile Menu Open / Close
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileClose = document.getElementById('mobile-menu-close');
+            const mobileDrawer = document.getElementById('mobile-drawer');
+            const mobileOverlay = document.getElementById('mobile-drawer-overlay');
+
+            function openMobileMenu() {
+                if (mobileDrawer) mobileDrawer.classList.add('open');
+                if (mobileOverlay) mobileOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMobileMenu() {
+                if (mobileDrawer) mobileDrawer.classList.remove('open');
+                if (mobileOverlay) mobileOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            if (mobileBtn) mobileBtn.addEventListener('click', openMobileMenu);
+            if (mobileClose) mobileClose.addEventListener('click', closeMobileMenu);
+            if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
         });
     </script>
     @yield('scripts')
