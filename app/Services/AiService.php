@@ -208,6 +208,12 @@ class AiService
 
         $finalText = implode("\n\n", $processed);
 
+        // If external LLM is available, use it for deep humanization rewrite
+        $llmResult = $this->callExternalAi('humanize', $text, $style, []);
+        if ($llmResult && !empty($llmResult['content'])) {
+            $finalText = $llmResult['content'];
+        }
+
         return [
             'success' => true,
             'original' => $text,
@@ -231,6 +237,20 @@ class AiService
         }
 
         $cleanTopic = rtrim($topic, '.?!');
+
+        // Try generating dynamic platform assets via LLM
+        $llmResult = $this->callExternalAi('repurpose', $topic, 'engaging', []);
+        if ($llmResult && !empty($llmResult['content'])) {
+            $parsed = $this->parseRepurposedContent($llmResult['content'], $cleanTopic);
+            if (!empty($parsed)) {
+                return [
+                    'success' => true,
+                    'topic' => $topic,
+                    'provider' => $llmResult['provider'] ?? 'ai-engine',
+                    'assets' => $parsed
+                ];
+            }
+        }
 
         return [
             'success' => true,
@@ -271,61 +291,207 @@ class AiService
     }
 
     /**
+     * Parse multi-platform repurposed text from LLM.
+     */
+    protected function parseRepurposedContent(string $raw, string $topic): array
+    {
+        // Try parsing JSON if model returned JSON
+        if (str_contains($raw, '{') && str_contains($raw, '}')) {
+            $jsonStart = strpos($raw, '{');
+            $jsonEnd = strrpos($raw, '}');
+            $jsonStr = substr($raw, $jsonStart, $jsonEnd - $jsonStart + 1);
+            $decoded = json_decode($jsonStr, true);
+            if (is_array($decoded) && (isset($decoded['linkedin']) || isset($decoded['twitter']))) {
+                return [
+                    'linkedin' => [
+                        'platform' => 'LinkedIn',
+                        'icon' => 'linkedin',
+                        'title' => 'Viral LinkedIn Thought Leadership Post',
+                        'content' => is_array($decoded['linkedin']) ? ($decoded['linkedin']['content'] ?? json_encode($decoded['linkedin'])) : $decoded['linkedin']
+                    ],
+                    'twitter' => [
+                        'platform' => 'Twitter / X',
+                        'icon' => 'twitter',
+                        'title' => 'Viral Twitter / X Thread',
+                        'content' => is_array($decoded['twitter']) ? ($decoded['twitter']['content'] ?? json_encode($decoded['twitter'])) : $decoded['twitter']
+                    ],
+                    'instagram' => [
+                        'platform' => 'Instagram / TikTok',
+                        'icon' => 'instagram',
+                        'title' => 'Instagram Carousel / Caption',
+                        'content' => is_array($decoded['instagram']) ? ($decoded['instagram']['content'] ?? json_encode($decoded['instagram'])) : ($decoded['instagram'] ?? "Breakdown for $topic")
+                    ],
+                    'newsletter' => [
+                        'platform' => 'Email Newsletter',
+                        'icon' => 'mail',
+                        'title' => 'High-Open-Rate Newsletter',
+                        'content' => is_array($decoded['newsletter']) ? ($decoded['newsletter']['content'] ?? json_encode($decoded['newsletter'])) : ($decoded['newsletter'] ?? "Newsletter update on $topic")
+                    ],
+                    'youtube_shorts' => [
+                        'platform' => 'YouTube Shorts / TikTok',
+                        'icon' => 'video',
+                        'title' => 'Viral Short Video Script',
+                        'content' => is_array($decoded['youtube_shorts'] ?? $decoded['tiktok_reels'] ?? null) ? json_encode($decoded['youtube_shorts'] ?? $decoded['tiktok_reels']) : ($decoded['youtube_shorts'] ?? $decoded['tiktok_reels'] ?? "Shorts script for $topic")
+                    ]
+                ];
+            }
+        }
+
+        return [];
+    }
+
+    /**
      * Call external LLM provider if configured.
+     * Supports Groq, DeepSeek, OpenAI, OpenRouter, and Google Gemini with automatic failover.
      */
     protected function callExternalAi(string $tool, string $topic, string $tone, array $params): ?array
     {
-        $geminiKey = config('services.gemini.key');
-        $openaiKey = config('services.openai.key');
-        $groqKey = config('services.groq.key');
+        $prompt = $this->buildPrompt($tool, $topic, $tone, $params);
+        $systemPrompt = 'You are Postryx AI, the world-class viral copywriter, growth engineer, and programmatic SEO expert. Generate high-converting, punchy, cleanly formatted content tailored specifically to the requested format without preamble.';
 
-        // Check Gemini
-        if (!empty($geminiKey)) {
+        $httpOptions = [
+            'force_ip_resolve' => 'v4',
+            'connect_timeout' => 10,
+            'timeout' => 30,
+        ];
+
+        // 1. Check Groq (Ultra-fast Llama-3.3-70b)
+        $groqKey = config('services.groq.key');
+        if (!empty($groqKey)) {
             try {
-                $prompt = $this->buildPrompt($tool, $topic, $tone, $params);
-                $model = config('services.gemini.model', 'gemini-2.0-flash');
-                $response = Http::withHeaders(['Content-Type' => 'application/json'])
+                $model = config('services.groq.model', 'llama-3.3-70b-versatile');
+                $response = Http::withoutVerifying()
+                    ->withOptions($httpOptions)
+                    ->withToken($groqKey)
                     ->timeout(25)
-                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$geminiKey}", [
-                        'contents' => [
-                            ['parts' => [['text' => $prompt]]]
+                    ->post('https://api.groq.com/openai/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => $prompt]
                         ],
-                        'generationConfig' => [
-                            'temperature' => 0.7,
-                            'maxOutputTokens' => 2048,
-                        ]
+                        'temperature' => 0.7,
+                        'max_tokens' => 2048,
                     ]);
 
                 if ($response->successful()) {
                     $json = $response->json();
-                    $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                    $text = $json['choices'][0]['message']['content'] ?? null;
                     if ($text) {
                         return [
                             'success' => true,
-                            'provider' => 'gemini',
+                            'provider' => 'groq (' . $model . ')',
                             'tool' => $tool,
                             'content' => trim($text),
                             'wordCount' => str_word_count($text),
                             'charCount' => mb_strlen($text)
                         ];
                     }
+                } else {
+                    Log::warning('Groq API call returned error: ' . $response->body());
                 }
             } catch (\Throwable $e) {
-                Log::warning('Gemini AI call failed, falling back: ' . $e->getMessage());
+                Log::warning('Groq AI call failed: ' . $e->getMessage());
             }
         }
 
-        // Check OpenAI
-        if (!empty($openaiKey)) {
+        // 2. Check DeepSeek
+        $deepseekKey = config('services.deepseek.key');
+        if (!empty($deepseekKey)) {
             try {
-                $prompt = $this->buildPrompt($tool, $topic, $tone, $params);
-                $model = config('services.openai.model', 'gpt-4o-mini');
-                $response = Http::withToken($openaiKey)
+                $model = config('services.deepseek.model', 'deepseek-chat');
+                $response = Http::withoutVerifying()
+                    ->withOptions($httpOptions)
+                    ->withToken($deepseekKey)
                     ->timeout(25)
-                    ->post("https://api.openai.com/v1/chat/completions", [
+                    ->post('https://api.deepseek.com/chat/completions', [
                         'model' => $model,
                         'messages' => [
-                            ['role' => 'system', 'content' => 'You are Postryx AI, the world-class viral copywriter and programmatic SEO expert. Generate high-converting, punchy, formatted content.'],
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => $prompt]
+                        ],
+                        'temperature' => 0.7,
+                        'max_tokens' => 2048,
+                    ]);
+
+                if ($response->successful()) {
+                    $json = $response->json();
+                    $text = $json['choices'][0]['message']['content'] ?? null;
+                    if ($text) {
+                        return [
+                            'success' => true,
+                            'provider' => 'deepseek (' . $model . ')',
+                            'tool' => $tool,
+                            'content' => trim($text),
+                            'wordCount' => str_word_count($text),
+                            'charCount' => mb_strlen($text)
+                        ];
+                    }
+                } else {
+                    Log::warning('DeepSeek API call returned error: ' . $response->body());
+                }
+            } catch (\Throwable $e) {
+                Log::warning('DeepSeek AI call failed: ' . $e->getMessage());
+            }
+        }
+
+        // 3. Check OpenAI
+        $openaiKey = config('services.openai.key');
+        if (!empty($openaiKey)) {
+            try {
+                $model = config('services.openai.model', 'gpt-4o-mini');
+                $response = Http::withoutVerifying()
+                    ->withOptions($httpOptions)
+                    ->withToken($openaiKey)
+                    ->timeout(25)
+                    ->post('https://api.openai.com/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => $prompt]
+                        ],
+                        'temperature' => 0.7,
+                        'max_tokens' => 2048,
+                    ]);
+
+                if ($response->successful()) {
+                    $json = $response->json();
+                    $text = $json['choices'][0]['message']['content'] ?? null;
+                    if ($text) {
+                        return [
+                            'success' => true,
+                            'provider' => 'openai (' . $model . ')',
+                            'tool' => $tool,
+                            'content' => trim($text),
+                            'wordCount' => str_word_count($text),
+                            'charCount' => mb_strlen($text)
+                        ];
+                    }
+                } else {
+                    Log::warning('OpenAI API call returned error: ' . $response->body());
+                }
+            } catch (\Throwable $e) {
+                Log::warning('OpenAI call failed: ' . $e->getMessage());
+            }
+        }
+
+        // 4. Check OpenRouter
+        $openrouterKey = config('services.openrouter.key');
+        if (!empty($openrouterKey)) {
+            try {
+                $model = config('services.openrouter.model', 'meta-llama/llama-3.3-70b-instruct');
+                $response = Http::withoutVerifying()
+                    ->withOptions($httpOptions)
+                    ->withToken($openrouterKey)
+                    ->withHeaders([
+                        'HTTP-Referer' => config('app.url', 'https://postryx.in'),
+                        'X-Title' => config('app.name', 'Postryx AI'),
+                    ])
+                    ->timeout(25)
+                    ->post('https://openrouter.ai/api/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
                             ['role' => 'user', 'content' => $prompt]
                         ],
                         'temperature' => 0.7,
@@ -337,16 +503,62 @@ class AiService
                     if ($text) {
                         return [
                             'success' => true,
-                            'provider' => 'openai',
+                            'provider' => 'openrouter (' . $model . ')',
                             'tool' => $tool,
                             'content' => trim($text),
                             'wordCount' => str_word_count($text),
                             'charCount' => mb_strlen($text)
                         ];
                     }
+                } else {
+                    Log::warning('OpenRouter API call returned error: ' . $response->body());
                 }
             } catch (\Throwable $e) {
-                Log::warning('OpenAI call failed, falling back: ' . $e->getMessage());
+                Log::warning('OpenRouter AI call failed: ' . $e->getMessage());
+            }
+        }
+
+        // 5. Check Google Gemini (with model auto-fallback)
+        $geminiKey = config('services.gemini.key');
+        if (!empty($geminiKey)) {
+            $configuredModel = config('services.gemini.model', 'gemini-3.6-flash');
+            $candidateModels = array_unique([$configuredModel, 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash']);
+
+            foreach ($candidateModels as $model) {
+                try {
+                    $response = Http::withoutVerifying()
+                        ->withOptions($httpOptions)
+                        ->withHeaders(['Content-Type' => 'application/json'])
+                        ->timeout(25)
+                        ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$geminiKey}", [
+                            'contents' => [
+                                ['parts' => [['text' => $prompt]]]
+                            ],
+                            'generationConfig' => [
+                                'temperature' => 0.7,
+                                'maxOutputTokens' => 2048,
+                            ]
+                        ]);
+
+                    if ($response->successful()) {
+                        $json = $response->json();
+                        $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                        if ($text) {
+                            return [
+                                'success' => true,
+                                'provider' => 'gemini (' . $model . ')',
+                                'tool' => $tool,
+                                'content' => trim($text),
+                                'wordCount' => str_word_count($text),
+                                'charCount' => mb_strlen($text)
+                            ];
+                        }
+                    } else {
+                        Log::warning("Gemini ({$model}) API call returned error: " . $response->body());
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning("Gemini ({$model}) AI call failed: " . $e->getMessage());
+                }
             }
         }
 
@@ -368,6 +580,8 @@ class AiService
             'ad_copy' => "Write 3 high-converting ad variations (Meta/Facebook Ads, Google Search Ads, TikTok Ads) for: '{$topic}'. Include primary text, punchy headlines, and high-CTR CTA.",
             'cold_email' => "Write a 3-step high-converting B2B cold email sequence for: '{$topic}'. (Step 1: 50-word curiosity pitch, Step 2: Social proof follow-up, Step 3: Friendly breakup email).",
             'hashtag' => "Generate 30 categorized viral hashtags (High volume, Mid tier, Niche specific) for: '{$topic}'.",
+            'humanize' => "Rewrite and humanize the following text so that it reads naturally, authentically, and bypasses AI detectors (100% human score). Remove all AI cliches (like 'delve', 'tapestry', 'testament to', 'game-changer', 'unveiling', 'in conclusion'). Introduce natural conversational burstiness and variance in sentence length. Retain the core meaning:\n\n{$topic}",
+            'repurpose' => "Repurpose the following core topic/insight into 5 distinct platform assets: LinkedIn post, Twitter thread, Instagram caption, Email Newsletter blurb, and YouTube Shorts script. Return ONLY a valid JSON object with keys: linkedin (string), twitter (string), instagram (string), newsletter (string), youtube_shorts (string). Topic: '{$topic}'",
             default => "Create top-performing viral marketing content about: '{$topic}'. Tone: {$tone}."
         };
     }
