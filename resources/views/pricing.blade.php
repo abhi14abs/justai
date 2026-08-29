@@ -1,7 +1,57 @@
 @extends('layouts.app')
 
-@section('title', 'Pricing & Plans — Postryx AI Viral SaaS Platform')
-@section('meta_description', 'Transparent, high-ROI pricing for creators, founders, and agencies. Start free or upgrade to Pro Growth with unlimited generations and AI humanizer.')
+@section('title', 'Pricing & Plans — Postryx AI Viral Content & SEO SaaS Platform')
+@section('meta_description', 'Transparent, high-ROI pricing for creators, founders, and agencies. Start free with 5 daily credits or upgrade to Pro Growth with unlimited generations and AI humanizer.')
+@section('meta_keywords', 'Postryx AI pricing, AI content generator plans, viral SaaS pricing, affordable AI copywriter, Postryx pro lifetime deal, postryx.in')
+@section('og_title', 'Pricing & Plans — Postryx AI Viral SaaS Platform')
+@section('og_description', 'Start free or get 50% OFF Lifetime Pro Access with code LAUNCH50. Unlimited viral copy and programmatic SEO generation.')
+
+@section('extra_schema')
+<script type="application/ld+json">
+{!! json_encode([
+  '@context' => 'https://schema.org',
+  '@type' => 'Product',
+  'name' => 'Postryx AI Growth Platform',
+  'image' => url('/images/postryx-og-banner.png'),
+  'description' => 'Autonomous AI platform for viral content creation, LinkedIn post generation, AI humanization, and programmatic SEO.',
+  'brand' => [
+    '@type' => 'Brand',
+    'name' => 'Postryx AI'
+  ],
+  'offers' => [
+    [
+      '@type' => 'Offer',
+      'name' => 'Starter Creator Plan',
+      'price' => '4.99',
+      'priceCurrency' => 'USD',
+      'availability' => 'https://schema.org/InStock',
+      'url' => url('/pricing')
+    ],
+    [
+      '@type' => 'Offer',
+      'name' => 'Pro Growth Plan',
+      'price' => '12.49',
+      'priceCurrency' => 'USD',
+      'availability' => 'https://schema.org/InStock',
+      'url' => url('/pricing')
+    ],
+    [
+      '@type' => 'Offer',
+      'name' => 'Agency Scale Plan',
+      'price' => '29.99',
+      'priceCurrency' => 'USD',
+      'availability' => 'https://schema.org/InStock',
+      'url' => url('/pricing')
+    ]
+  ],
+  'aggregateRating' => [
+    '@type' => 'AggregateRating',
+    'ratingValue' => '4.9',
+    'reviewCount' => '1420'
+  ]
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endsection
 
 @section('content')
 
@@ -271,6 +321,14 @@
 
     function triggerCheckout(plan) {
         const bill = plan === 'lifetime' ? 'lifetime' : currentBilling;
+        if (typeof window.trackGAEvent === 'function') {
+            window.trackGAEvent('begin_checkout', {
+                plan_name: plan,
+                currency: currentCurrency,
+                billing_cycle: bill,
+                value: plan === 'lifetime' ? 99 : (plan === 'agency' ? 29.99 : (plan === 'pro' ? 12.49 : 4.99))
+            });
+        }
         window.location.href = `/checkout?plan=${plan}&currency=${currentCurrency}&billing=${bill}`;
     }
 

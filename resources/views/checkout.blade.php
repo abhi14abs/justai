@@ -252,6 +252,14 @@
 
                 const captureData = await captureRes.json();
                 if (captureData.success) {
+                    if (typeof window.trackGAEvent === 'function') {
+                        window.trackGAEvent('purchase', {
+                            transaction_id: currentOrderNumber,
+                            value: {{ $finalPrice }},
+                            currency: '{{ $currency }}',
+                            items: [{ item_name: '{{ $planName }}', item_category: 'SaaS Subscription' }]
+                        });
+                    }
                     window.location.href = captureData.redirect_url;
                 } else {
                     alert('Payment capture failed: ' + (captureData.error || 'Please contact support.'));
@@ -335,6 +343,14 @@
                             const verifyData = await verifyRes.json();
                             if (verifyData.success) {
                                 Postryx.showToast('Payment successful! Redirecting...', 'success');
+                                if (typeof window.trackGAEvent === 'function') {
+                                    window.trackGAEvent('purchase', {
+                                        transaction_id: currentOrderNumber,
+                                        value: {{ $finalPrice }},
+                                        currency: '{{ $currency }}',
+                                        items: [{ item_name: '{{ $planName }}', item_category: 'SaaS Subscription' }]
+                                    });
+                                }
                                 window.location.href = verifyData.redirect_url;
                             } else {
                                 Postryx.showToast(verifyData.error || 'Payment verification failed', 'error');
@@ -388,6 +404,14 @@
 
         const data = await res.json();
         if (data.success) {
+            if (typeof window.trackGAEvent === 'function') {
+                window.trackGAEvent('purchase', {
+                    transaction_id: currentOrderNumber,
+                    value: {{ $finalPrice }},
+                    currency: '{{ $currency }}',
+                    items: [{ item_name: '{{ $planName }}', item_category: 'SaaS Subscription' }]
+                });
+            }
             window.location.href = data.redirect_url;
         }
     }

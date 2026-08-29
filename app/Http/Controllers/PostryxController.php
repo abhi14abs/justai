@@ -539,44 +539,52 @@ class PostryxController extends Controller
     }
 
     /**
-     * Dynamic SEO Sitemap.xml.
+     * Dynamic SEO Sitemap.xml with Image Namespace & Priorities.
      */
     public function sitemap()
     {
-        $baseUrl = config('app.url', 'https://postryx.in');
+        $baseUrl = rtrim(config('app.url', 'https://postryx.in'), '/');
         $date = date('Y-m-d');
         $urls = [
-            ['loc' => $baseUrl . '/', 'priority' => '1.0', 'changefreq' => 'daily'],
-            ['loc' => $baseUrl . '/pricing', 'priority' => '0.9', 'changefreq' => 'weekly'],
+            ['loc' => $baseUrl . '/', 'priority' => '1.0', 'changefreq' => 'daily', 'image' => $baseUrl . '/images/postryx-og-banner.png', 'title' => 'Postryx AI Autonomous Viral Engine'],
+            ['loc' => $baseUrl . '/pricing', 'priority' => '0.9', 'changefreq' => 'weekly', 'image' => $baseUrl . '/images/postryx-og-banner.png', 'title' => 'Postryx AI Pricing & Plans'],
             ['loc' => $baseUrl . '/affiliate', 'priority' => '0.8', 'changefreq' => 'weekly'],
             ['loc' => $baseUrl . '/blog', 'priority' => '0.8', 'changefreq' => 'daily'],
             ['loc' => $baseUrl . '/terms', 'priority' => '0.3', 'changefreq' => 'monthly'],
             ['loc' => $baseUrl . '/privacy', 'priority' => '0.3', 'changefreq' => 'monthly'],
         ];
 
-        // Add 12 Tools
+        // Add 12 Programmatic Tools
         foreach ($this->tools as $t) {
             $urls[] = [
                 'loc' => $baseUrl . '/tools/' . $t['slug'],
                 'priority' => '0.9',
                 'changefreq' => 'daily',
-                'lastmod' => $date
+                'lastmod' => $date,
+                'image' => $baseUrl . '/images/postryx-og-banner.png',
+                'title' => $t['title']
             ];
         }
 
         // Add Dynamic Active Blog Posts from Database
-        $activeBlogs = \App\Models\Blog::active()->get();
-        foreach ($activeBlogs as $b) {
-            $urls[] = [
-                'loc' => $baseUrl . '/blog/' . $b->slug,
-                'priority' => '0.7',
-                'changefreq' => 'weekly',
-                'lastmod' => $b->updated_at->format('Y-m-d')
-            ];
+        try {
+            $activeBlogs = \App\Models\Blog::active()->get();
+            foreach ($activeBlogs as $b) {
+                $urls[] = [
+                    'loc' => $baseUrl . '/blog/' . $b->slug,
+                    'priority' => '0.8',
+                    'changefreq' => 'weekly',
+                    'lastmod' => $b->updated_at->format('Y-m-d'),
+                    'image' => $b->featured_image ? (str_starts_with($b->featured_image, 'http') ? $b->featured_image : $baseUrl . '/' . ltrim($b->featured_image, '/')) : ($baseUrl . '/images/postryx-og-banner.png'),
+                    'title' => $b->title
+                ];
+            }
+        } catch (\Throwable $e) {
+            // In case database is temporarily unmigrated
         }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
 
         foreach ($urls as $u) {
             $xml .= '  <url>' . "\n";
@@ -584,6 +592,14 @@ class PostryxController extends Controller
             $xml .= '    <lastmod>' . ($u['lastmod'] ?? $date) . '</lastmod>' . "\n";
             $xml .= '    <changefreq>' . $u['changefreq'] . '</changefreq>' . "\n";
             $xml .= '    <priority>' . $u['priority'] . '</priority>' . "\n";
+            if (!empty($u['image'])) {
+                $xml .= '    <image:image>' . "\n";
+                $xml .= '      <image:loc>' . htmlspecialchars($u['image']) . '</image:loc>' . "\n";
+                if (!empty($u['title'])) {
+                    $xml .= '      <image:title>' . htmlspecialchars($u['title']) . '</image:title>' . "\n";
+                }
+                $xml .= '    </image:image>' . "\n";
+            }
             $xml .= '  </url>' . "\n";
         }
 
@@ -593,21 +609,36 @@ class PostryxController extends Controller
     }
 
     /**
-     * Custom robots.txt Generator.
+     * Custom SEO & AI Search Crawler robots.txt Generator.
      */
     public function robots()
     {
-        $baseUrl = config('app.url', 'https://postryx.in');
-        $content = "User-agent: *\n";
+        $baseUrl = rtrim(config('app.url', 'https://postryx.in'), '/');
+        
+        $content = "# Postryx AI Autonomous Robots Configuration\n";
+        $content .= "User-agent: *\n";
         $content .= "Allow: /\n";
         $content .= "Disallow: /api/\n";
-        $content .= "Disallow: /admin/\n\n";
-        $content .= "# AI Crawlers allowed for search indexing\n";
+        $content .= "Disallow: /admin/\n";
+        $content .= "Disallow: /dashboard/\n";
+        $content .= "Disallow: /affiliate/dashboard\n\n";
+
+        $content .= "# Search Engine Web & Image Crawlers\n";
         $content .= "User-agent: Googlebot\nAllow: /\n";
+        $content .= "User-agent: Googlebot-Image\nAllow: /\n";
         $content .= "User-agent: Bingbot\nAllow: /\n";
+        $content .= "User-agent: Applebot\nAllow: /\n";
+        $content .= "User-agent: DuckDuckBot\nAllow: /\n\n";
+
+        $content .= "# AI Search Engines & LLM Crawlers (Allowed for High-Intent Indexing)\n";
         $content .= "User-agent: GPTBot\nAllow: /\n";
+        $content .= "User-agent: ChatGPT-User\nAllow: /\n";
+        $content .= "User-agent: OAI-SearchBot\nAllow: /\n";
         $content .= "User-agent: ClaudeBot\nAllow: /\n";
-        $content .= "User-agent: PerplexityBot\nAllow: /\n\n";
+        $content .= "User-agent: anthropic-ai\nAllow: /\n";
+        $content .= "User-agent: PerplexityBot\nAllow: /\n";
+        $content .= "User-agent: CCBot\nAllow: /\n\n";
+
         $content .= "Sitemap: {$baseUrl}/sitemap.xml\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');

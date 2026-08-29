@@ -76,4 +76,8 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'google_analytics' => [
+        'id' => env('GOOGLE_ANALYTICS_ID', env('GA_MEASUREMENT_ID', 'G-PW916MWGTT')),
+    ],
+
 ];

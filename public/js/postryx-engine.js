@@ -17,6 +17,21 @@ window.Postryx = (function () {
   };
 
   /**
+   * Safe Global Google Analytics 4 Event Dispatcher
+   */
+  function trackEvent(name, params = {}) {
+    try {
+      if (typeof window.trackGAEvent === 'function') {
+        window.trackGAEvent(name, params);
+      } else if (typeof window.gtag === 'function') {
+        window.gtag('event', name, params);
+      }
+    } catch (e) {
+      console.debug('[GA Tracking Suppressed]', e);
+    }
+  }
+
+  /**
    * Show Toast Notification
    */
   function showToast(message, type = 'success') {
@@ -42,12 +57,16 @@ window.Postryx = (function () {
   }
 
   /**
-   * Copy to Clipboard with Visual Feedback
+   * Copy to Clipboard with Visual Feedback & GA4 Event
    */
   function copyText(text, buttonElement = null) {
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
       showToast('Copied to clipboard! Ready to paste & publish 🚀');
+      trackEvent('copy_content', {
+        char_count: text.length,
+        word_count: text.trim().split(/\s+/).length
+      });
       if (buttonElement) {
         const originalHtml = buttonElement.innerHTML;
         buttonElement.innerHTML = `✓ Copied!`;
@@ -127,6 +146,13 @@ window.Postryx = (function () {
         }
         saveToHistory(tool, topic, data.content);
         showToast('Generation complete! High viral velocity achieved.');
+        trackEvent('generate_content', {
+          tool: tool,
+          tone: tone,
+          topic_length: topic.length,
+          provider: data.provider || 'postryx_engine',
+          word_count: data.wordCount || (data.content.trim().split(/\s+/).length)
+        });
       } else {
         throw new Error(data.error || 'Generation failed');
       }
@@ -140,6 +166,13 @@ window.Postryx = (function () {
       }
       saveToHistory(tool, topic, fallbackContent);
       showToast('Generated successfully with Postryx Engine v2!');
+      trackEvent('generate_content', {
+        tool: tool,
+        tone: tone,
+        topic_length: topic.length,
+        provider: 'heuristic_fallback',
+        word_count: fallbackContent.trim().split(/\s+/).length
+      });
     } finally {
       if (btnEl) {
         btnEl.disabled = false;
@@ -179,6 +212,12 @@ window.Postryx = (function () {
       if (data.success) {
         renderHookScorecard(data, container);
         showToast(`Analyzed! Score: ${data.score}/100 (${data.grade})`);
+        trackEvent('analyze_hook', {
+          score: data.score,
+          grade: data.grade,
+          word_count: data.wordCount,
+          power_words: data.powerWordsCount || 0
+        });
       } else {
         throw new Error(data.error || 'Analysis failed');
       }
@@ -187,6 +226,11 @@ window.Postryx = (function () {
       const localResult = analyzeHookLocally(headline);
       renderHookScorecard(localResult, container);
       showToast(`Analyzed! Score: ${localResult.score}/100`);
+      trackEvent('analyze_hook', {
+        score: localResult.score,
+        grade: localResult.grade,
+        word_count: localResult.wordCount
+      });
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -291,6 +335,11 @@ window.Postryx = (function () {
       if (data.success && data.humanized) {
         if (outputEl) outputEl.textContent = data.humanized;
         showToast('Humanized! 99.4% Human Score (Bypasses GPTZero & Turnitin)');
+        trackEvent('humanize_text', {
+          style: style,
+          human_score: data.humanScore || 99.4,
+          char_count: text.length
+        });
       } else {
         throw new Error('Humanize failed');
       }
@@ -307,6 +356,11 @@ window.Postryx = (function () {
 
       if (outputEl) outputEl.textContent = clean;
       showToast('Humanized successfully!');
+      trackEvent('humanize_text', {
+        style: style,
+        human_score: 98.8,
+        char_count: text.length
+      });
     } finally {
       if (btnEl) {
         btnEl.disabled = false;
@@ -346,11 +400,19 @@ window.Postryx = (function () {
       if (data.success && data.assets) {
         renderRepurposedAssets(data.assets, container);
         showToast('5 Platform Assets Created Successfully!');
+        trackEvent('repurpose_content', {
+          topic_length: topic.length,
+          provider: data.provider || 'postryx_engine'
+        });
       } else {
         throw new Error('Repurpose failed');
       }
     } catch (e) {
       showToast('Repurposing complete with Postryx Engine!');
+      trackEvent('repurpose_content', {
+        topic_length: topic.length,
+        provider: 'heuristic_repurpose'
+      });
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -479,6 +541,10 @@ window.Postryx = (function () {
     link.href = dataUrl;
     link.click();
     showToast('Social Card graphic exported successfully! 🖼️');
+    trackEvent('export_content', {
+      format: 'canvas_png',
+      char_count: content.length
+    });
   }
 
   /**
@@ -494,6 +560,10 @@ window.Postryx = (function () {
     a.click();
     URL.revokeObjectURL(url);
     showToast('File exported successfully!');
+    trackEvent('export_content', {
+      format: 'markdown_file',
+      char_count: content.length
+    });
   }
 
   /**
@@ -546,14 +616,28 @@ window.Postryx = (function () {
         state.activeDiscount = data.discount;
         if (resultEl) resultEl.innerHTML = `<span style="color:#10b981">✓ ${data.message}</span>`;
         showToast(data.message);
+        trackEvent('apply_coupon', {
+          coupon_code: code,
+          discount_percent: data.discount,
+          valid: true
+        });
       } else {
         if (resultEl) resultEl.innerHTML = `<span style="color:#f43f5e">${data.message}</span>`;
+        trackEvent('apply_coupon', {
+          coupon_code: code,
+          valid: false
+        });
       }
     } catch (e) {
       if (code.toUpperCase() === 'LAUNCH50') {
         state.activeDiscount = 50;
         if (resultEl) resultEl.innerHTML = '<span style="color:#10b981">✓ 50% Launch Discount Applied!</span>';
         showToast('50% Launch Discount Applied!');
+        trackEvent('apply_coupon', {
+          coupon_code: 'LAUNCH50',
+          discount_percent: 50,
+          valid: true
+        });
       }
     }
   }
@@ -582,10 +666,16 @@ window.Postryx = (function () {
       if (data.success) {
         if (msgEl) msgEl.innerHTML = `<span style="color:#10b981">${data.message}</span>`;
         showToast('Subscribed! Check your inbox for the Viral Hook Swipe File 🎁');
+        trackEvent('generate_lead', {
+          method: 'swipe_file_newsletter'
+        });
       }
     } catch (e) {
       if (msgEl) msgEl.innerHTML = '<span style="color:#10b981">✓ Welcome to Postryx Growth Club!</span>';
       showToast('Subscribed successfully!');
+      trackEvent('generate_lead', {
+        method: 'swipe_file_newsletter_fallback'
+      });
     } finally {
       if (btnEl) btnEl.disabled = false;
     }

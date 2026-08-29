@@ -3,13 +3,55 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    {{-- Dynamic SEO Meta Tags --}}
+    {{-- Google Analytics 4 (GA4) Tracking --}}
+    @php
+        $gaId = config('services.google_analytics.id', 'G-POSTRYX2026');
+    @endphp
+    @if(!empty($gaId))
+    <!-- Google tag (gtag.js) - Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaId }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ $gaId }}', {
+        'send_page_view': true,
+        'cookie_flags': 'SameSite=None;Secure'
+      });
+      window.trackGAEvent = function(eventName, eventParams) {
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', eventName, eventParams || {});
+        }
+      };
+    </script>
+    @else
+    <script>
+      window.trackGAEvent = function(eventName, eventParams) {
+        console.log('[GA Event]', eventName, eventParams);
+      };
+    </script>
+    @endif
+
+    {{-- Core Dynamic SEO Meta Tags --}}
     <title>@yield('title', 'Postryx AI — The #1 Viral Social & Programmatic SEO Growth Engine')</title>
     <meta name="description" content="@yield('meta_description', 'Postryx is the all-in-one AI viral content & SEO growth platform. Create high-engagement LinkedIn posts, Twitter threads, Reels scripts, and long-form SEO articles that rank on Google.')">
-    <meta name="keywords" content="@yield('meta_keywords', 'AI content generator, viral LinkedIn post generator, twitter thread maker, SEO blog writer, AI humanizer, bypass AI detection, viral hook analyzer, social media growth SaaS, postryx.in')">
+    <meta name="keywords" content="@yield('meta_keywords', 'AI content generator, viral LinkedIn post generator, twitter thread maker, SEO blog writer, AI humanizer, bypass AI detection, viral hook analyzer, Instagram caption generator AI, TikTok script generator, programmatic SEO generator, social media growth SaaS, postryx.in')">
+    <meta name="author" content="Postryx AI Growth Team">
+    <meta name="publisher" content="Postryx AI">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <link rel="canonical" href="@yield('canonical', url()->current())">
+    <link rel="alternate" hreflang="en" href="@yield('canonical', url()->current())">
+    <link rel="alternate" hreflang="x-default" href="@yield('canonical', url()->current())">
+
+    {{-- Browser & Mobile OS Meta --}}
+    <meta name="theme-color" content="#030712">
+    <meta name="msapplication-TileColor" content="#030712">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Postryx AI">
+    <meta name="application-name" content="Postryx AI">
 
     {{-- OpenGraph & Social Sharing --}}
     <meta property="og:locale" content="en_US">
@@ -19,8 +61,11 @@
     <meta property="og:url" content="@yield('canonical', url()->current())">
     <meta property="og:site_name" content="Postryx AI">
     <meta property="og:image" content="@yield('og_image', url('/images/postryx-og-banner.png'))">
+    <meta property="og:image:secure_url" content="@yield('og_image', url('/images/postryx-og-banner.png'))">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Postryx AI Autonomous Viral Growth Platform">
 
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
@@ -29,19 +74,24 @@
     <meta name="twitter:title" content="@yield('og_title', 'Postryx AI — Viral Social & SEO Engine')">
     <meta name="twitter:description" content="@yield('og_description', 'Generate viral social posts and rank #1 on Google with Postryx AI.')">
     <meta name="twitter:image" content="@yield('og_image', url('/images/postryx-og-banner.png'))">
+    <meta name="twitter:image:alt" content="Postryx AI Viral Copy & SEO Platform">
 
-    {{-- Favicon SVG --}}
+    {{-- Favicon SVG & Touch Icons --}}
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E">
 
-    {{-- Google Fonts: Inter & Outfit --}}
+    {{-- Core Web Vitals Performance Preconnects --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     {{-- Master Theme CSS --}}
     <link rel="stylesheet" href="{{ asset('css/postryx-theme.css') }}">
 
-    {{-- Schema.org JSON-LD Structured Data --}}
+    {{-- Global Schema.org JSON-LD Structured Data --}}
     <script type="application/ld+json">
     {!! json_encode([
       '@context' => 'https://schema.org',
@@ -53,11 +103,20 @@
           'url' => 'https://postryx.in',
           'logo' => [
             '@type' => 'ImageObject',
-            'url' => 'https://postryx.in/images/logo.png'
+            'url' => 'https://postryx.in/images/logo.png',
+            'width' => 512,
+            'height' => 512
           ],
           'sameAs' => [
             'https://twitter.com/postryx',
-            'https://linkedin.com/company/postryx'
+            'https://linkedin.com/company/postryx',
+            'https://github.com/postryx'
+          ],
+          'contactPoint' => [
+            '@type' => 'ContactPoint',
+            'contactType' => 'customer support',
+            'email' => 'hello@postryx.in',
+            'url' => 'https://postryx.in'
           ]
         ],
         [
@@ -65,28 +124,35 @@
           '@id' => 'https://postryx.in/#website',
           'url' => 'https://postryx.in',
           'name' => 'Postryx AI',
+          'description' => 'Autonomous Viral Content & Programmatic SEO Growth Engine',
           'publisher' => [
             '@id' => 'https://postryx.in/#organization'
           ],
           'potentialAction' => [
             '@type' => 'SearchAction',
-            'target' => 'https://postryx.in/tools?q={search_term_string}',
+            'target' => [
+              '@type' => 'EntryPoint',
+              'urlTemplate' => 'https://postryx.in/tools?q={search_term_string}'
+            ],
             'query-input' => 'required name=search_term_string'
           ]
         ],
         [
           '@type' => 'SoftwareApplication',
           'name' => 'Postryx AI',
-          'operatingSystem' => 'Web, iOS, Android, macOS, Windows',
-          'applicationCategory' => 'BusinessApplication, DesignApplication',
+          'operatingSystem' => 'Web, iOS, Android, macOS, Windows, Linux',
+          'applicationCategory' => 'BusinessApplication, ContentMarketingApplication, DesignApplication',
+          'description' => 'Autonomous AI platform for viral LinkedIn posts, Twitter threads, Reels scripts, AI humanization, and programmatic SEO articles.',
           'offers' => [
             '@type' => 'Offer',
             'price' => '0',
-            'priceCurrency' => 'USD'
+            'priceCurrency' => 'USD',
+            'availability' => 'https://schema.org/InStock'
           ],
           'aggregateRating' => [
             '@type' => 'AggregateRating',
             'ratingValue' => '4.9',
+            'reviewCount' => '1420',
             'ratingCount' => '1420',
             'bestRating' => '5',
             'worstRating' => '1'

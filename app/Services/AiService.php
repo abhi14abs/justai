@@ -342,224 +342,253 @@ class AiService
 
     /**
      * Call external LLM provider if configured.
-     * Supports Groq, DeepSeek, OpenAI, OpenRouter, and Google Gemini with automatic failover.
+     * Supports Groq, DeepSeek, OpenAI, OpenRouter, and Google Gemini with dual-transport (cURL + Stream) failover.
      */
     protected function callExternalAi(string $tool, string $topic, string $tone, array $params): ?array
     {
         $prompt = $this->buildPrompt($tool, $topic, $tone, $params);
         $systemPrompt = 'You are Postryx AI, the world-class viral copywriter, growth engineer, and programmatic SEO expert. Generate high-converting, punchy, cleanly formatted content tailored specifically to the requested format without preamble.';
 
-        $httpOptions = [
-            'force_ip_resolve' => 'v4',
-            'connect_timeout' => 10,
-            'timeout' => 30,
-        ];
-
-        // 1. Check Groq (Ultra-fast Llama-3.3-70b)
-        $groqKey = config('services.groq.key');
-        if (!empty($groqKey)) {
-            try {
-                $model = config('services.groq.model', 'llama-3.3-70b-versatile');
-                $response = Http::withoutVerifying()
-                    ->withOptions($httpOptions)
-                    ->withToken($groqKey)
-                    ->timeout(25)
-                    ->post('https://api.groq.com/openai/v1/chat/completions', [
-                        'model' => $model,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $systemPrompt],
-                            ['role' => 'user', 'content' => $prompt]
-                        ],
-                        'temperature' => 0.7,
-                        'max_tokens' => 2048,
-                    ]);
-
-                if ($response->successful()) {
-                    $json = $response->json();
-                    $text = $json['choices'][0]['message']['content'] ?? null;
-                    if ($text) {
-                        return [
-                            'success' => true,
-                            'provider' => 'groq (' . $model . ')',
-                            'tool' => $tool,
-                            'content' => trim($text),
-                            'wordCount' => str_word_count($text),
-                            'charCount' => mb_strlen($text)
-                        ];
-                    }
-                } else {
-                    Log::warning('Groq API call returned error: ' . $response->body());
-                }
-            } catch (\Throwable $e) {
-                Log::warning('Groq AI call failed: ' . $e->getMessage());
-            }
-        }
-
-        // 2. Check DeepSeek
-        $deepseekKey = config('services.deepseek.key');
-        if (!empty($deepseekKey)) {
-            try {
-                $model = config('services.deepseek.model', 'deepseek-chat');
-                $response = Http::withoutVerifying()
-                    ->withOptions($httpOptions)
-                    ->withToken($deepseekKey)
-                    ->timeout(25)
-                    ->post('https://api.deepseek.com/chat/completions', [
-                        'model' => $model,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $systemPrompt],
-                            ['role' => 'user', 'content' => $prompt]
-                        ],
-                        'temperature' => 0.7,
-                        'max_tokens' => 2048,
-                    ]);
-
-                if ($response->successful()) {
-                    $json = $response->json();
-                    $text = $json['choices'][0]['message']['content'] ?? null;
-                    if ($text) {
-                        return [
-                            'success' => true,
-                            'provider' => 'deepseek (' . $model . ')',
-                            'tool' => $tool,
-                            'content' => trim($text),
-                            'wordCount' => str_word_count($text),
-                            'charCount' => mb_strlen($text)
-                        ];
-                    }
-                } else {
-                    Log::warning('DeepSeek API call returned error: ' . $response->body());
-                }
-            } catch (\Throwable $e) {
-                Log::warning('DeepSeek AI call failed: ' . $e->getMessage());
-            }
-        }
-
-        // 3. Check OpenAI
-        $openaiKey = config('services.openai.key');
-        if (!empty($openaiKey)) {
-            try {
-                $model = config('services.openai.model', 'gpt-4o-mini');
-                $response = Http::withoutVerifying()
-                    ->withOptions($httpOptions)
-                    ->withToken($openaiKey)
-                    ->timeout(25)
-                    ->post('https://api.openai.com/v1/chat/completions', [
-                        'model' => $model,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $systemPrompt],
-                            ['role' => 'user', 'content' => $prompt]
-                        ],
-                        'temperature' => 0.7,
-                        'max_tokens' => 2048,
-                    ]);
-
-                if ($response->successful()) {
-                    $json = $response->json();
-                    $text = $json['choices'][0]['message']['content'] ?? null;
-                    if ($text) {
-                        return [
-                            'success' => true,
-                            'provider' => 'openai (' . $model . ')',
-                            'tool' => $tool,
-                            'content' => trim($text),
-                            'wordCount' => str_word_count($text),
-                            'charCount' => mb_strlen($text)
-                        ];
-                    }
-                } else {
-                    Log::warning('OpenAI API call returned error: ' . $response->body());
-                }
-            } catch (\Throwable $e) {
-                Log::warning('OpenAI call failed: ' . $e->getMessage());
-            }
-        }
-
-        // 4. Check OpenRouter
-        $openrouterKey = config('services.openrouter.key');
-        if (!empty($openrouterKey)) {
-            try {
-                $model = config('services.openrouter.model', 'meta-llama/llama-3.3-70b-instruct');
-                $response = Http::withoutVerifying()
-                    ->withOptions($httpOptions)
-                    ->withToken($openrouterKey)
-                    ->withHeaders([
-                        'HTTP-Referer' => config('app.url', 'https://postryx.in'),
-                        'X-Title' => config('app.name', 'Postryx AI'),
-                    ])
-                    ->timeout(25)
-                    ->post('https://openrouter.ai/api/v1/chat/completions', [
-                        'model' => $model,
-                        'messages' => [
-                            ['role' => 'system', 'content' => $systemPrompt],
-                            ['role' => 'user', 'content' => $prompt]
-                        ],
-                        'temperature' => 0.7,
-                    ]);
-
-                if ($response->successful()) {
-                    $json = $response->json();
-                    $text = $json['choices'][0]['message']['content'] ?? null;
-                    if ($text) {
-                        return [
-                            'success' => true,
-                            'provider' => 'openrouter (' . $model . ')',
-                            'tool' => $tool,
-                            'content' => trim($text),
-                            'wordCount' => str_word_count($text),
-                            'charCount' => mb_strlen($text)
-                        ];
-                    }
-                } else {
-                    Log::warning('OpenRouter API call returned error: ' . $response->body());
-                }
-            } catch (\Throwable $e) {
-                Log::warning('OpenRouter AI call failed: ' . $e->getMessage());
-            }
-        }
-
-        // 5. Check Google Gemini (with model auto-fallback)
+        // 1. Check Google Gemini (Primary - ultra-fast, high context, free tier available)
         $geminiKey = config('services.gemini.key');
         if (!empty($geminiKey)) {
             $configuredModel = config('services.gemini.model', 'gemini-3.6-flash');
-            $candidateModels = array_unique([$configuredModel, 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash']);
+            $candidateModels = array_unique([
+                $configuredModel,
+                'gemini-3.6-flash',
+                'gemini-3.7-flash',
+                'gemini-3.5-flash',
+                'gemini-flash-latest',
+                'gemini-pro-latest',
+                'gemini-2.5-flash-lite'
+            ]);
+
+            // Only Google OAuth 2.0 access tokens start with ya29. All API keys (including AQ... and AIzaSy...) use x-goog-api-key / ?key=
+            $isOAuthToken = str_starts_with($geminiKey, 'ya29.');
 
             foreach ($candidateModels as $model) {
-                try {
-                    $response = Http::withoutVerifying()
-                        ->withOptions($httpOptions)
-                        ->withHeaders(['Content-Type' => 'application/json'])
-                        ->timeout(25)
-                        ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$geminiKey}", [
-                            'contents' => [
-                                ['parts' => [['text' => $prompt]]]
-                            ],
-                            'generationConfig' => [
-                                'temperature' => 0.7,
-                                'maxOutputTokens' => 2048,
-                            ]
-                        ]);
+                $geminiUrl = $isOAuthToken
+                    ? "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent"
+                    : "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$geminiKey}";
 
-                    if ($response->successful()) {
-                        $json = $response->json();
-                        $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                        if ($text) {
-                            return [
-                                'success' => true,
-                                'provider' => 'gemini (' . $model . ')',
-                                'tool' => $tool,
-                                'content' => trim($text),
-                                'wordCount' => str_word_count($text),
-                                'charCount' => mb_strlen($text)
-                            ];
-                        }
-                    } else {
-                        Log::warning("Gemini ({$model}) API call returned error: " . $response->body());
-                    }
-                } catch (\Throwable $e) {
-                    Log::warning("Gemini ({$model}) AI call failed: " . $e->getMessage());
+                $headers = $isOAuthToken
+                    ? ['Authorization' => "Bearer {$geminiKey}"]
+                    : ['x-goog-api-key' => $geminiKey];
+
+                $json = $this->sendAiRequest(
+                    $geminiUrl,
+                    [
+                        'contents' => [
+                            ['parts' => [['text' => $prompt]]]
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.7,
+                            'maxOutputTokens' => 2048,
+                        ]
+                    ],
+                    $headers
+                );
+
+                $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+                if ($text) {
+                    return [
+                        'success' => true,
+                        'provider' => 'gemini (' . $model . ')',
+                        'tool' => $tool,
+                        'content' => trim($text),
+                        'wordCount' => str_word_count($text),
+                        'charCount' => mb_strlen($text)
+                    ];
                 }
             }
+        }
+
+        // 2. Check OpenRouter (Robust failover with Llama 3.3 70B)
+        $openrouterKey = config('services.openrouter.key');
+        if (!empty($openrouterKey)) {
+            $model = config('services.openrouter.model', 'meta-llama/llama-3.3-70b-instruct');
+            $json = $this->sendAiRequest(
+                'https://openrouter.ai/api/v1/chat/completions',
+                [
+                    'model' => $model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.7,
+                ],
+                [
+                    'Authorization' => "Bearer {$openrouterKey}",
+                    'HTTP-Referer' => config('app.url', 'https://postryx.in'),
+                    'X-Title' => config('app.name', 'Postryx AI'),
+                ]
+            );
+
+            $text = $json['choices'][0]['message']['content'] ?? null;
+            if ($text) {
+                return [
+                    'success' => true,
+                    'provider' => 'openrouter (' . $model . ')',
+                    'tool' => $tool,
+                    'content' => trim($text),
+                    'wordCount' => str_word_count($text),
+                    'charCount' => mb_strlen($text)
+                ];
+            }
+        }
+
+        // 3. Check Groq
+        $groqKey = config('services.groq.key');
+        if (!empty($groqKey)) {
+            $model = config('services.groq.model', 'llama-3.3-70b-versatile');
+            $json = $this->sendAiRequest(
+                'https://api.groq.com/openai/v1/chat/completions',
+                [
+                    'model' => $model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.7,
+                    'max_tokens' => 2048,
+                ],
+                ['Authorization' => "Bearer {$groqKey}"]
+            );
+
+            $text = $json['choices'][0]['message']['content'] ?? null;
+            if ($text) {
+                return [
+                    'success' => true,
+                    'provider' => 'groq (' . $model . ')',
+                    'tool' => $tool,
+                    'content' => trim($text),
+                    'wordCount' => str_word_count($text),
+                    'charCount' => mb_strlen($text)
+                ];
+            }
+        }
+
+        // 4. Check DeepSeek
+        $deepseekKey = config('services.deepseek.key');
+        if (!empty($deepseekKey)) {
+            $model = config('services.deepseek.model', 'deepseek-chat');
+            $json = $this->sendAiRequest(
+                'https://api.deepseek.com/chat/completions',
+                [
+                    'model' => $model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.7,
+                    'max_tokens' => 2048,
+                ],
+                ['Authorization' => "Bearer {$deepseekKey}"]
+            );
+
+            $text = $json['choices'][0]['message']['content'] ?? null;
+            if ($text) {
+                return [
+                    'success' => true,
+                    'provider' => 'deepseek (' . $model . ')',
+                    'tool' => $tool,
+                    'content' => trim($text),
+                    'wordCount' => str_word_count($text),
+                    'charCount' => mb_strlen($text)
+                ];
+            }
+        }
+
+        // 5. Check OpenAI
+        $openaiKey = config('services.openai.key');
+        if (!empty($openaiKey)) {
+            $model = config('services.openai.model', 'gpt-4o-mini');
+            $json = $this->sendAiRequest(
+                'https://api.openai.com/v1/chat/completions',
+                [
+                    'model' => $model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.7,
+                    'max_tokens' => 2048,
+                ],
+                ['Authorization' => "Bearer {$openaiKey}"]
+            );
+
+            $text = $json['choices'][0]['message']['content'] ?? null;
+            if ($text) {
+                return [
+                    'success' => true,
+                    'provider' => 'openai (' . $model . ')',
+                    'tool' => $tool,
+                    'content' => trim($text),
+                    'wordCount' => str_word_count($text),
+                    'charCount' => mb_strlen($text)
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resilient HTTP sender with cURL + Native PHP Stream fallback.
+     */
+    protected function sendAiRequest(string $url, array $body, array $headers = []): ?array
+    {
+        // 1. Try Laravel Http / Guzzle
+        try {
+            $response = Http::withoutVerifying()
+                ->withOptions([
+                    'force_ip_resolve' => 'v4',
+                    'connect_timeout' => 10,
+                    'timeout' => 25,
+                ])
+                ->withHeaders(array_merge(['Content-Type' => 'application/json'], $headers))
+                ->post($url, $body);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            Log::warning("AI API ($url) returned status {$response->status()}: " . $response->body());
+        } catch (\Throwable $e) {
+            Log::warning("Guzzle request to ($url) failed: " . $e->getMessage() . " - Trying native stream fallback...");
+        }
+
+        // 2. Fallback: Native PHP Stream Context (bypasses cURL extension restrictions)
+        try {
+            $headerLines = ["Content-Type: application/json"];
+            foreach ($headers as $name => $val) {
+                $headerLines[] = "{$name}: {$val}";
+            }
+
+            $context = stream_context_create([
+                'http' => [
+                    'method' => 'POST',
+                    'header' => implode("\r\n", $headerLines),
+                    'content' => json_encode($body),
+                    'timeout' => 25,
+                    'ignore_errors' => true,
+                ],
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ]
+            ]);
+
+            $raw = @file_get_contents($url, false, $context);
+            if ($raw !== false && !empty($raw)) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded) && (!isset($decoded['error']) || isset($decoded['choices']) || isset($decoded['candidates']))) {
+                    return $decoded;
+                }
+                Log::warning("Stream response from ($url): " . substr($raw, 0, 500));
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Native stream fallback to ($url) failed: " . $e->getMessage());
         }
 
         return null;

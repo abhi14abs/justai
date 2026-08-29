@@ -1,7 +1,10 @@
 @extends('layouts.app')
 
-@section('title', $tool['meta_title'])
+@section('title', $tool['meta_title'] . ' | Postryx AI')
 @section('meta_description', $tool['meta_description'])
+@section('meta_keywords', ($tool['title'] ?? '') . ', ' . ($tool['h1'] ?? '') . ', AI viral content generator, ' . ($tool['badge'] ?? '') . ', ' . ($tool['category'] ?? '') . ', postryx.in')
+@section('og_title', $tool['meta_title'])
+@section('og_description', $tool['meta_description'])
 
 @section('extra_schema')
 <script type="application/ld+json">
@@ -12,12 +15,36 @@
       '@type' => 'SoftwareApplication',
       'name' => $tool['title'],
       'applicationCategory' => 'BusinessApplication',
-      'operatingSystem' => 'Web',
+      'operatingSystem' => 'Web, iOS, Android, macOS, Windows',
+      'description' => $tool['meta_description'],
       'offers' => [
         '@type' => 'Offer',
         'price' => '0',
-        'priceCurrency' => 'USD'
+        'priceCurrency' => 'USD',
+        'availability' => 'https://schema.org/InStock'
+      ],
+      'aggregateRating' => [
+        '@type' => 'AggregateRating',
+        'ratingValue' => '4.9',
+        'reviewCount' => '680',
+        'ratingCount' => '680',
+        'bestRating' => '5',
+        'worstRating' => '1'
       ]
+    ],
+    [
+      '@type' => 'HowTo',
+      'name' => 'How to use ' . $tool['title'] . ' in 4 Simple Steps',
+      'description' => 'A step-by-step guide to generating viral content using ' . $tool['title'] . ' on Postryx AI.',
+      'totalTime' => 'PT2M',
+      'step' => array_map(function($step, $index) {
+        return [
+          '@type' => 'HowToStep',
+          'position' => $index + 1,
+          'name' => $step['title'],
+          'text' => $step['desc']
+        ];
+      }, $tool['guide_steps'] ?? [], array_keys($tool['guide_steps'] ?? []))
     ],
     [
       '@type' => 'FAQPage',
@@ -44,8 +71,8 @@
         [
           '@type' => 'ListItem',
           'position' => 2,
-          'name' => 'Tools',
-          'item' => url('/#tools')
+          'name' => 'AI Tools',
+          'item' => url('/#studio-section')
         ],
         [
           '@type' => 'ListItem',

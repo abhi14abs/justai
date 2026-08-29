@@ -1,30 +1,66 @@
 @extends('layouts.app')
 
-@section('title', ($post->meta_title ?? $post->title) . ' | Postryx AI')
+@section('title', ($post->meta_title ?? $post->title) . ' | Postryx AI Blog')
 @section('meta_description', $post->meta_description ?? $post->excerpt)
+@section('meta_keywords', ($post->category ?? '') . ', AI SEO, viral content marketing, ' . (is_array($post->tags) ? implode(', ', $post->tags) : '') . ', postryx.in')
+@section('og_type', 'article')
+@section('og_title', $post->title)
+@section('og_description', $post->meta_description ?? $post->excerpt)
+@section('og_image', $post->image_url ? (str_starts_with($post->image_url, 'http') ? $post->image_url : url($post->image_url)) : url('/images/postryx-og-banner.png'))
 
 @section('extra_schema')
 <script type="application/ld+json">
 {!! json_encode([
   '@context' => 'https://schema.org',
-  '@type' => 'Article',
-  'headline' => $post->title,
-  'description' => $post->meta_description ?? $post->excerpt,
-  'image' => $post->image_url,
-  'author' => [
-    '@type' => 'Person',
-    'name' => $post->author_name
-  ],
-  'publisher' => [
-    '@type' => 'Organization',
-    'name' => 'Postryx AI',
-    'logo' => [
-      '@type' => 'ImageObject',
-      'url' => asset('images/logo.png')
+  '@graph' => [
+    [
+      '@type' => 'BlogPosting',
+      'headline' => $post->title,
+      'description' => $post->meta_description ?? $post->excerpt,
+      'image' => $post->image_url ? (str_starts_with($post->image_url, 'http') ? $post->image_url : url($post->image_url)) : url('/images/postryx-og-banner.png'),
+      'author' => [
+        '@type' => 'Person',
+        'name' => $post->author_name
+      ],
+      'publisher' => [
+        '@type' => 'Organization',
+        'name' => 'Postryx AI',
+        'logo' => [
+          '@type' => 'ImageObject',
+          'url' => url('/images/logo.png')
+        ]
+      ],
+      'datePublished' => $post->created_at->toAtomString(),
+      'dateModified' => $post->updated_at->toAtomString(),
+      'mainEntityOfPage' => [
+        '@type' => 'WebPage',
+        '@id' => url()->current()
+      ]
+    ],
+    [
+      '@type' => 'BreadcrumbList',
+      'itemListElement' => [
+        [
+          '@type' => 'ListItem',
+          'position' => 1,
+          'name' => 'Home',
+          'item' => url('/')
+        ],
+        [
+          '@type' => 'ListItem',
+          'position' => 2,
+          'name' => 'Blog & Guides',
+          'item' => route('blog.index')
+        ],
+        [
+          '@type' => 'ListItem',
+          'position' => 3,
+          'name' => $post->title,
+          'item' => url()->current()
+        ]
+      ]
     ]
-  ],
-  'datePublished' => $post->created_at->toAtomString(),
-  'dateModified' => $post->updated_at->toAtomString()
+  ]
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) !!}
 </script>
 @endsection
