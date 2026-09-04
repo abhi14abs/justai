@@ -21,5 +21,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        if (
+            app()->environment('production') ||
+            request()->server('HTTP_X_FORWARDED_PROTO') === 'https' ||
+            str_contains(config('app.url', ''), 'https://') ||
+            request()->isSecure()
+        ) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
     }
 }

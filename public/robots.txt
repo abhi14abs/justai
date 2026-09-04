@@ -1,22 +1,41 @@
+# Postryx AI Autonomous Robots Configuration
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /affiliate/dashboard
 
+# Traditional Web & Image Search Engines
 User-agent: Googlebot
 Allow: /
-
+User-agent: Googlebot-Image
+Allow: /
 User-agent: Bingbot
 Allow: /
+User-agent: Applebot
+Allow: /
+User-agent: DuckDuckBot
+Allow: /
+User-agent: YandexBot
+Allow: /
 
+# AI Search Engines & LLM Retrieval Crawlers (Generative Engine Optimization)
 User-agent: GPTBot
 Allow: /
-
+User-agent: ChatGPT-User
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
 User-agent: ClaudeBot
 Allow: /
-
+User-agent: anthropic-ai
+Allow: /
 User-agent: PerplexityBot
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: Google-Extended
 Allow: /
 
 Sitemap: https://postryx.in/sitemap.xml
-

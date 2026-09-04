@@ -26,6 +26,15 @@ class RazorpayService
         if (!empty($this->keySecret) && $this->keyId !== 'rzp_test_postryx') {
             try {
                 $response = Http::withoutVerifying()
+                    ->withOptions([
+                        'curl' => [
+                            CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
+                            CURLOPT_SSL_VERIFYPEER => false,
+                            CURLOPT_SSL_VERIFYHOST => 0,
+                        ],
+                        'timeout' => 15,
+                        'connect_timeout' => 10,
+                    ])
                     ->withBasicAuth($this->keyId, $this->keySecret)
                     ->post('https://api.razorpay.com/v1/orders', [
                         'amount' => $amountInPaise,
@@ -65,8 +74,12 @@ class RazorpayService
     /**
      * Verify Razorpay Payment Signature.
      */
-    public function verifySignature(?string $orderId, string $paymentId, ?string $signature): bool
+    public function verifySignature(?string $orderId, ?string $paymentId, ?string $signature): bool
     {
+        if (empty($paymentId)) {
+            return false;
+        }
+
         if (empty($this->keySecret) || $this->keyId === 'rzp_test_postryx' || empty($signature) || empty($orderId)) {
             // Test mode / client-side payment auto-verify if payment_id is provided
             return !empty($paymentId);

@@ -271,6 +271,40 @@
                     <span class="nav-label">Blog Articles (CMS)</span>
                 </a>
 
+                <div class="nav-label" style="font-size: 11px; font-weight: 700; color: #FBBF24; text-transform: uppercase; letter-spacing: 0.08em; padding: 16px 12px 6px;">
+                    💌 Digital Invitations
+                </div>
+
+                <a href="{{ route('admin.invitations.dashboard') }}" class="admin-nav-item {{ request()->routeIs('admin.invitations.dashboard*') ? 'active' : '' }}">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Invites Overview</span>
+                </a>
+
+                <a href="{{ route('admin.invitations.templates') }}" class="admin-nav-item {{ request()->routeIs('admin.invitations.templates*') ? 'active' : '' }}">
+                    <span class="nav-icon">🎨</span>
+                    <span class="nav-label">Templates &amp; Sections</span>
+                </a>
+
+                <a href="{{ route('admin.invitations.categories') }}" class="admin-nav-item {{ request()->routeIs('admin.invitations.categories*') ? 'active' : '' }}">
+                    <span class="nav-icon">📑</span>
+                    <span class="nav-label">Categories</span>
+                </a>
+
+                <a href="{{ route('admin.invitations.features') }}" class="admin-nav-item {{ request()->routeIs('admin.invitations.features*') ? 'active' : '' }}">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-label">Feature Pricing</span>
+                </a>
+
+                <a href="{{ route('admin.invitations.orders') }}" class="admin-nav-item {{ request()->routeIs('admin.invitations.orders*') ? 'active' : '' }}">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-label">Invitation Orders</span>
+                </a>
+
+                <a href="{{ route('admin.invitations.submissions') }}" class="admin-nav-item {{ request()->routeIs('admin.invitations.submissions*') ? 'active' : '' }}">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-label">RSVP Responses</span>
+                </a>
+
                 <div class="nav-label" style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 16px 12px 6px;">
                     AI Engine &amp; System
                 </div>

@@ -106,6 +106,16 @@ class User extends Authenticatable
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    public function invitations()
+    {
+        return $this->hasMany(\App\Models\Invitations\Invitation::class, 'user_id');
+    }
+
+    public function invitationOrders()
+    {
+        return $this->hasMany(\App\Models\Invitations\InvitationOrder::class, 'user_id');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

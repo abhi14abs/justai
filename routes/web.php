@@ -114,3 +114,90 @@ Route::prefix('api')->group(function () {
     Route::post('/checkout/razorpay/verify', [PaymentController::class, 'verifyRazorpay'])->name('api.checkout.razorpay.verify');
     Route::post('/checkout/upi/submit', [PaymentController::class, 'submitUpiPayment'])->name('api.checkout.upi.submit');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Digital Invitation Platform Routes (CelebrateAI)
+|--------------------------------------------------------------------------
+*/
+use App\Http\Controllers\Invitations\InvitationBrowseController;
+use App\Http\Controllers\Invitations\InvitationBuilderController;
+use App\Http\Controllers\Invitations\InvitationCheckoutController;
+use App\Http\Controllers\Invitations\InvitationDashboardController;
+use App\Http\Controllers\Invitations\InvitationPublicController;
+use App\Http\Controllers\Invitations\Admin\InvitationAdminController;
+use App\Http\Controllers\Invitations\Api\InvitationApiController;
+
+// 1. Public Marketplace & Browsing
+Route::get('/invitations', [InvitationBrowseController::class, 'index'])->name('invitations.browse.index');
+Route::get('/invitations/category/{slug}', [InvitationBrowseController::class, 'category'])->name('invitations.browse.category');
+Route::get('/invitations/preview/{slug}', [InvitationBrowseController::class, 'preview'])->name('invitations.browse.preview');
+
+// 2. Public Live Invitations & RSVPs (Mobile-First Slug URLs)
+Route::get('/i/{slug}', [InvitationPublicController::class, 'show'])->name('invitations.public.show');
+Route::post('/i/{slug}/rsvp', [InvitationPublicController::class, 'submitRsvp'])->name('invitations.public.rsvp');
+Route::post('/i/{slug}/share/{channel}', [InvitationPublicController::class, 'trackShare'])->name('invitations.public.share');
+Route::post('/i/{slug}/memories/upload', [InvitationPublicController::class, 'uploadMemory'])->name('invitations.public.memories.upload');
+Route::get('/i/{slug}/memories', [InvitationPublicController::class, 'getMemories'])->name('invitations.public.memories.list');
+
+// 3. Customer Builder & Member Dashboard Routes (Protected)
+Route::middleware(['auth'])->group(function () {
+    // Builder
+    Route::get('/invitations/builder/{templateSlug}/create', [InvitationBuilderController::class, 'createFromTemplate'])->name('invitations.builder.create');
+    Route::get('/invitations/builder/{id}', [InvitationBuilderController::class, 'edit'])->name('invitations.builder.edit');
+    Route::post('/invitations/builder/{id}/update', [InvitationBuilderController::class, 'update'])->name('invitations.builder.update');
+    Route::post('/invitations/builder/{id}/event/add', [InvitationBuilderController::class, 'addEvent'])->name('invitations.builder.event.add');
+    Route::post('/invitations/builder/{id}/event/{eventId}/update', [InvitationBuilderController::class, 'updateEvent'])->name('invitations.builder.event.update');
+    Route::post('/invitations/builder/{id}/event/{eventId}/delete', [InvitationBuilderController::class, 'deleteEvent'])->name('invitations.builder.event.delete');
+    Route::post('/invitations/builder/{id}/section/{sectionId}/update', [InvitationBuilderController::class, 'updateSection'])->name('invitations.builder.section.update');
+    Route::post('/invitations/builder/{id}/rsvp/update', [InvitationBuilderController::class, 'updateRsvp'])->name('invitations.builder.rsvp.update');
+
+    // Checkout & Publishing
+    Route::get('/invitations/checkout/{id}', [InvitationCheckoutController::class, 'checkout'])->name('invitations.checkout.index');
+    Route::post('/invitations/checkout/{id}/order/create', [InvitationCheckoutController::class, 'createOrder'])->name('invitations.checkout.order.create');
+    Route::post('/invitations/checkout/{id}/payment/verify', [InvitationCheckoutController::class, 'verifyPayment'])->name('invitations.checkout.payment.verify');
+    Route::post('/invitations/checkout/{id}/payment/failed', [InvitationCheckoutController::class, 'recordPaymentFailure'])->name('invitations.checkout.payment.failed');
+
+    // Customer Member Management Dashboard
+    Route::get('/dashboard/invitations', [InvitationDashboardController::class, 'index'])->name('invitations.dashboard.index');
+    Route::get('/dashboard/invitations/{id}/guests', [InvitationDashboardController::class, 'guests'])->name('invitations.dashboard.guests');
+    Route::post('/dashboard/invitations/{id}/guests/add', [InvitationDashboardController::class, 'addGuest'])->name('invitations.dashboard.guest.add');
+    Route::post('/dashboard/invitations/{id}/guests/import', [InvitationDashboardController::class, 'importGuests'])->name('invitations.dashboard.guests.import');
+    Route::post('/dashboard/invitations/{id}/guests/{guestId}/delete', [InvitationDashboardController::class, 'deleteGuest'])->name('invitations.dashboard.guest.delete');
+    Route::get('/dashboard/invitations/{id}/analytics', [InvitationDashboardController::class, 'analytics'])->name('invitations.dashboard.analytics');
+    Route::get('/dashboard/invitations/{id}/qr', [InvitationDashboardController::class, 'qrStudio'])->name('invitations.dashboard.qr');
+    Route::get('/dashboard/invitations/{id}/memories', [InvitationDashboardController::class, 'memories'])->name('invitations.dashboard.memories');
+    Route::post('/dashboard/invitations/{id}/memories/{assetId}/delete', [InvitationDashboardController::class, 'deleteMemory'])->name('invitations.dashboard.memories.delete');
+    Route::post('/dashboard/invitations/{id}/whatsapp/generate', [InvitationDashboardController::class, 'generateWhatsAppMessage'])->name('invitations.dashboard.whatsapp.generate');
+    Route::get('/dashboard/invitations/{id}/scanner', [InvitationDashboardController::class, 'checkInScanner'])->name('invitations.dashboard.scanner');
+    Route::post('/dashboard/invitations/{id}/scanner/checkin', [InvitationDashboardController::class, 'checkInApi'])->name('invitations.dashboard.scanner.checkin');
+    Route::post('/dashboard/invitations/{id}/duplicate', [InvitationDashboardController::class, 'duplicate'])->name('invitations.dashboard.duplicate');
+    Route::post('/dashboard/invitations/{id}/delete', [InvitationDashboardController::class, 'delete'])->name('invitations.dashboard.delete');
+
+    // Admin Master Control for Digital Invitations
+    Route::prefix('admin/invitations')->group(function () {
+        Route::get('/', [InvitationAdminController::class, 'dashboard'])->name('admin.invitations.dashboard');
+        Route::get('/dashboard', [InvitationAdminController::class, 'dashboard']);
+        Route::get('/categories', [InvitationAdminController::class, 'categories'])->name('admin.invitations.categories');
+        Route::post('/categories/store', [InvitationAdminController::class, 'storeCategory'])->name('admin.invitations.categories.store');
+        Route::get('/templates', [InvitationAdminController::class, 'templates'])->name('admin.invitations.templates');
+        Route::post('/templates/store', [InvitationAdminController::class, 'storeTemplate'])->name('admin.invitations.templates.store');
+        Route::get('/features', [InvitationAdminController::class, 'features'])->name('admin.invitations.features');
+        Route::get('/orders', [InvitationAdminController::class, 'orders'])->name('admin.invitations.orders');
+        Route::get('/submissions', [InvitationAdminController::class, 'rsvpSubmissions'])->name('admin.invitations.submissions');
+        Route::get('/coupons', [InvitationAdminController::class, 'coupons'])->name('admin.invitations.coupons');
+    });
+});
+
+// 4. Invitation Platform REST APIs
+Route::prefix('api/invitations')->group(function () {
+    Route::post('/pricing/calculate', [InvitationApiController::class, 'calculatePricing'])->name('api.invitations.pricing');
+    Route::post('/coupon/validate', [InvitationApiController::class, 'validateCoupon'])->name('api.invitations.coupon');
+    Route::post('/ai/love-story', [InvitationApiController::class, 'generateLoveStory'])->name('api.invitations.ai.story');
+    Route::post('/ai/poetic-wording', [InvitationApiController::class, 'generatePoeticWording'])->name('api.invitations.ai.wording');
+    Route::post('/ai/palette', [InvitationApiController::class, 'recommendPalette'])->name('api.invitations.ai.palette');
+    Route::post('/ai/parse-prompt', [InvitationApiController::class, 'parseAiPrompt'])->name('api.invitations.ai.parse');
+    Route::post('/ai/tone-copy', [InvitationApiController::class, 'generateToneCopy'])->name('api.invitations.ai.tone');
+    Route::post('/ai/create-from-prompt', [InvitationApiController::class, 'createFromAiPrompt'])->name('api.invitations.ai.create');
+});
+

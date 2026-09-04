@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Postryx AI — The #1 Viral Social & Programmatic SEO Growth Engine')
-@section('meta_description', 'Postryx is the next-gen AI content SaaS. Generate viral LinkedIn posts, Twitter threads, Reels scripts, and long-form SEO articles that rank #1 on Google and bypass AI detectors.')
+@section('meta_description', 'Postryx is the all-in-one AI viral content & SEO growth platform. Create high-engagement LinkedIn posts, Twitter threads, Reels scripts, and long-form SEO articles that rank on Google and bypass AI detectors.')
+@section('meta_keywords', 'AI content generator, viral LinkedIn post generator, twitter thread maker, SEO blog writer, AI humanizer, bypass AI detection, viral hook analyzer, Instagram caption generator AI, TikTok script generator, programmatic SEO generator, social media growth SaaS, postryx.in')
 
 @section('extra_schema')
 <script type="application/ld+json">
@@ -22,7 +23,7 @@
       'name' => 'Can Postryx articles bypass AI detection tools like Turnitin and GPTZero?',
       'acceptedAnswer' => [
         '@type' => 'Answer',
-        'text' => 'Yes. Our AI Content Humanizer restructures syntax, eliminates robotic AI cliches, and injects natural human burstiness and perplexity to achieve 99.4% human authenticity scores.'
+        'text' => 'Yes. Our AI Content Humanizer restructures syntax, eliminates robotic AI cliches, and injects natural human burstiness and perplexity to achieve 99.4% human authenticity scores across GPTZero, Turnitin, and Originality AI.'
       ]
     ],
     [
@@ -35,10 +36,18 @@
     ],
     [
       '@type' => 'Question',
-      'name' => 'What platforms does Postryx support?',
+      'name' => 'What social platforms and formats does Postryx support?',
       'acceptedAnswer' => [
         '@type' => 'Answer',
-        'text' => 'Postryx generates tailored content for LinkedIn, Twitter / X, Instagram, TikTok, YouTube Shorts, Google SEO blogs, Meta Ads, and B2B Cold Email sequences.'
+        'text' => 'Postryx generates tailored content for LinkedIn posts & carousels, Twitter / X threads, Instagram captions & reels, TikTok 60s video scripts, YouTube Shorts & descriptions, Google long-form SEO articles, Meta Ads, and B2B Cold Email sequences.'
+      ]
+    ],
+    [
+      '@type' => 'Question',
+      'name' => 'How does Programmatic SEO work with Postryx AI?',
+      'acceptedAnswer' => [
+        '@type' => 'Answer',
+        'text' => 'Postryx generates long-form 2,000+ word pillar articles with semantic H1/H2/H3 hierarchies, comparison tables, and FAQPage JSON-LD schema ready to rank #1 on Google and generative AI search engines.'
       ]
     ]
   ]
@@ -50,28 +59,28 @@
 
 {{-- Hero Section --}}
 <section style="padding: 70px 24px 50px; text-align: center; position: relative;">
-    <div style="max-width: 1080px; margin: 0 auto;">
+    <div style="max-width: 1100px; margin: 0 auto;">
         
         {{-- Floating Badge --}}
         <div style="margin-bottom: 24px;">
-            <span class="badge-pill" style="padding: 6px 16px; font-size: 14px;">
-                <span style="color:#67e8f9;">⚡</span> Postryx AI 2.0 • The Autonomous Viral Growth Engine
+            <span class="badge-pill" style="padding: 6px 18px; font-size: 14px;">
+                <span style="color:#67e8f9;">⚡</span> Postryx AI 2.0 • The Autonomous Viral &amp; SEO Growth Engine
             </span>
         </div>
 
         {{-- Main H1 --}}
-        <h1 style="font-size: clamp(38px, 5.5vw, 68px); line-height: 1.1; margin-bottom: 24px; font-weight: 800;">
+        <h1 style="font-size: clamp(38px, 5.5vw, 68px); line-height: 1.1; margin-bottom: 24px; font-weight: 900; letter-spacing: -0.02em;">
             Generate <span class="gradient-text">Viral Social Posts</span> &amp; <br/>
             <span class="gradient-text-cyan">Rank #1 on Google</span> with Autonomous AI
         </h1>
 
-        {{-- Subtitle --}}
-        <p style="font-size: clamp(17px, 2vw, 21px); color: var(--text-secondary); max-width: 820px; margin: 0 auto 36px; line-height: 1.6;">
-            Turn 1 core idea into 10 multi-platform viral posts (<span style="color:#38bdf8;">LinkedIn</span>, <span style="color:#60a5fa;">Twitter/X</span>, <span style="color:#f472b6;">Instagram Reels</span>) and 2,000+ word programmatic SEO articles that bypass AI detectors with a <strong>99.4% human score</strong>.
+        {{-- Subtitle with Keyword Density --}}
+        <p style="font-size: clamp(17px, 2vw, 21px); color: var(--text-secondary); max-width: 860px; margin: 0 auto 36px; line-height: 1.6;">
+            Turn 1 core idea into 10 multi-platform viral posts (<span style="color:#38bdf8; font-weight:600;">LinkedIn Posts</span>, <span style="color:#60a5fa; font-weight:600;">Twitter/X Threads</span>, <span style="color:#f472b6; font-weight:600;">Instagram Reels Scripts</span>) and 2,000+ word programmatic SEO articles that bypass AI detectors with a <strong>99.4% human score</strong>.
         </p>
 
         {{-- Hero CTA Buttons --}}
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 40px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 44px;">
             <a href="#studio-section" class="btn-primary" style="padding: 14px 32px; font-size: 16px; font-weight: 700;">
                 <span>Launch Free Studio</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -81,11 +90,11 @@
             </a>
         </div>
 
-        {{-- Hero Product Showcase Banner --}}
+        {{-- Product Showcase Banner --}}
         <div style="max-width: 1000px; margin: 0 auto 48px; position: relative;">
             <div style="position: absolute; inset: -2px; background: linear-gradient(135deg, rgba(99,102,241,0.6), rgba(6,182,212,0.6), rgba(168,85,247,0.6)); border-radius: 20px; filter: blur(15px); opacity: 0.6; z-index: 0;"></div>
             <div class="glass-panel-glow" style="position: relative; z-index: 1; padding: 10px; border-radius: 18px; overflow: hidden; box-shadow: 0 25px 60px -15px rgba(0,0,0,0.9);">
-                <img src="{{ asset('images/postryx-hero-banner.png') }}" alt="Postryx AI Autonomous Growth Dashboard" style="width: 100%; height: auto; border-radius: 12px; display: block; object-fit: cover;">
+                <img src="{{ asset('images/postryx-hero-banner.png') }}" alt="Postryx AI Viral Content & SEO Dashboard" style="width: 100%; height: auto; border-radius: 12px; display: block; object-fit: cover;">
             </div>
         </div>
 
@@ -104,7 +113,7 @@
     </div>
 </section>
 
-{{-- Interactive Hero Studio (Live Interactive Generation Playground) --}}
+{{-- Interactive Studio (Live Interactive Generation Playground) --}}
 <section id="studio-section" style="padding: 30px 24px 80px; position: relative;">
     <div style="max-width: 1200px; margin: 0 auto;">
         
@@ -121,128 +130,94 @@
                     <button class="studio-tab-btn" onclick="switchStudioTool('twitter', this)">
                         <span>🧵</span> Twitter / X Thread
                     </button>
-                    <button class="studio-tab-btn" onclick="switchStudioTool('instagram', this)">
-                        <span>📸</span> Instagram Reel &amp; Caption
-                    </button>
-                    <button class="studio-tab-btn" onclick="switchStudioTool('seo_blog', this)">
-                        <span>📄</span> SEO Blog Article
-                    </button>
-                    <button class="studio-tab-btn" onclick="switchStudioTool('analyze_hook', this)">
-                        <span>⚡</span> Viral Hook Analyzer
-                    </button>
                     <button class="studio-tab-btn" onclick="switchStudioTool('humanize', this)">
                         <span>✨</span> AI Humanizer
                     </button>
+                    <button class="studio-tab-btn" onclick="switchStudioTool('analyze_hook', this)">
+                        <span>⚡</span> Hook Analyzer
+                    </button>
+                    <button class="studio-tab-btn" onclick="switchStudioTool('seo_blog', this)">
+                        <span>📝</span> SEO Blog Post
+                    </button>
+                    <button class="studio-tab-btn" onclick="switchStudioTool('repurpose', this)">
+                        <span>🔄</span> Repurpose (5-in-1)
+                    </button>
                 </div>
 
-                {{-- Live Credits Indicator --}}
-                <div class="badge-pill-cyan">
-                    <span>⚡ 5 Free Daily Generations</span>
+                {{-- Quick Credits Counter --}}
+                <div class="badge-pill-emerald" style="font-size: 12px;">
+                    <span>● 5 Free Daily Credits Active</span>
                 </div>
             </div>
 
-            {{-- Studio Two-Column Grid --}}
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 28px;">
+            {{-- Studio Input / Output Split Grid --}}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
                 
-                {{-- Input Column --}}
+                {{-- Studio Input Controls --}}
                 <div style="display: flex; flex-direction: column; gap: 18px;">
                     
                     <div>
-                        <label id="studio-input-label" style="display: block; font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">
+                        <label id="studio-input-label" style="display: block; font-size: 14px; font-weight: 600; color: #f8fafc; margin-bottom: 8px;">
                             Enter Your Topic or Core Insight:
                         </label>
-                        <textarea id="studio-topic-input" class="postryx-textarea" style="min-height: 140px;" placeholder="e.g. 5 counter-intuitive lessons learned scaling a digital business to $50k/mo without spending on ads...">Why 90% of creators fail at audience retention (and how to fix it in 2026)</textarea>
+                        <textarea id="studio-topic-input" class="postryx-textarea" placeholder="e.g. 5 counter-intuitive lessons learned scaling a SaaS to $50k MRR without ads...">Why 90% of founders fail at organic content marketing (and how to fix it)</textarea>
                     </div>
 
-                    {{-- Tone Selector & Controls --}}
-                    <div id="studio-tone-controls" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+                    {{-- Tone Selector --}}
+                    <div id="studio-tone-controls" style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <label style="font-size: 13px; color: var(--text-secondary);">Tone:</label>
+                            <label style="font-size: 13px; color: var(--text-secondary);">Tone &amp; Voice:</label>
                             <select id="studio-tone-select" class="postryx-input" style="padding: 8px 12px; font-size: 13px; width: auto;">
-                                <option value="engaging">🔥 Thought Leader (Engaging)</option>
-                                <option value="contrarian">💡 Contrarian (Bold &amp; Direct)</option>
-                                <option value="storyteller">📖 Storyteller (Authentic)</option>
-                                <option value="actionable">⚡ Step-by-Step (Actionable)</option>
-                                <option value="witty">✨ Conversational &amp; Witty</option>
+                                <option value="engaging">🔥 Thought Leader &amp; Viral</option>
+                                <option value="contrarian">💡 Contrarian &amp; Direct</option>
+                                <option value="storyteller">📖 Personal Storyteller</option>
+                                <option value="actionable">⚡ Step-by-Step Blueprint</option>
+                                <option value="professional">💼 Professional &amp; Authoritative</option>
                             </select>
-                        </div>
-
-                        <div style="font-size: 12px; color: var(--text-muted);">
-                            <span id="counter-words">12 words</span> • <span id="counter-chars">68 chars</span>
                         </div>
                     </div>
 
                     {{-- Generate Action Button --}}
-                    <button id="postryx-generate-btn" onclick="executeStudioGeneration()" class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700;">
-                        <span>Generate Viral Copy 🚀</span>
+                    <button id="postryx-generate-btn" onclick="executeStudioGeneration()" class="btn-primary" style="padding: 14px; font-size: 15px; font-weight: 700; width: 100%;">
+                        <span>Generate Viral Post 🚀</span>
                     </button>
 
-                    {{-- Quick Template Prompts --}}
-                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;">
-                        <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
-                            ✨ Quick Try Templates:
-                        </div>
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                            <button onclick="setStudioPrompt('How to bypass AI detectors and create humanized SEO articles that rank on Google')" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">AI Humanizer</button>
-                            <button onclick="setStudioPrompt('The 7 deadly mistakes first-time founders make in their first 90 days')" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">Founder Mistakes</button>
-                            <button onclick="setStudioPrompt('How to repurpose 1 YouTube video into 10 multi-platform social posts in 5 minutes')" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">Repurposing</button>
-                        </div>
+                    {{-- Quick Prompt Injections --}}
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px;">
+                        <span style="color: var(--text-muted); align-self: center;">Try Prompts:</span>
+                        <button type="button" onclick="setStudioPrompt('How I scaled organic traffic to 100k visitors using programmatic SEO')" class="badge-pill" style="cursor: pointer; background: none; border: 1px dashed var(--border-subtle); font-size: 11px;">
+                            📈 Organic SEO Case Study
+                        </button>
+                        <button type="button" onclick="setStudioPrompt('3 cognitive biases that make viral hooks irresistible on social media')" class="badge-pill" style="cursor: pointer; background: none; border: 1px dashed var(--border-subtle); font-size: 11px;">
+                            🧠 Viral Hook Psychology
+                        </button>
                     </div>
 
                 </div>
 
-                {{-- Output Column --}}
+                {{-- Studio Live Result Area --}}
                 <div style="display: flex; flex-direction: column; gap: 14px;">
                     
-                    {{-- Output Header Actions --}}
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span class="badge-pill-emerald" style="font-size: 12px;">● Live Output</span>
-                            <span id="counter-readtime" style="font-size: 12px; color: var(--text-muted);">1m read</span>
-                        </div>
+                        <span class="badge-pill-emerald" style="font-size: 12px;">● Formatted Result</span>
 
                         <div style="display: flex; gap: 8px;">
                             <button onclick="Postryx.copy(document.getElementById('postryx-output').textContent, this)" class="btn-secondary" style="padding: 6px 14px; font-size: 13px;">
-                                📋 Copy Text
+                                📋 Copy
                             </button>
                             <button onclick="Postryx.exportCard(document.getElementById('postryx-output').textContent)" class="btn-secondary" style="padding: 6px 14px; font-size: 13px; color:#38bdf8;">
                                 🖼️ Export Card
                             </button>
-                            <button onclick="Postryx.exportFile(document.getElementById('postryx-output').textContent, 'postryx-viral-post.md')" class="btn-secondary" style="padding: 6px 12px; font-size: 13px;">
+                            <button onclick="Postryx.exportFile(document.getElementById('postryx-output').textContent, 'postryx-viral-content.md')" class="btn-secondary" style="padding: 6px 12px; font-size: 13px;">
                                 ⬇ .MD
                             </button>
                         </div>
                     </div>
 
-                    {{-- Live Output Display Box --}}
-                    <div id="postryx-output" class="result-box">99% of creators are approaching audience growth completely backward.
+                    {{-- Text Output Box --}}
+                    <div id="postryx-output" class="result-box" style="min-height: 280px;">✦ Click "Generate Viral Post" to create high-performing copy formatted for viral reach and search visibility...</div>
 
-Here is what the top 1% know (that most never realize):
-
----
-
-✦ 1. Velocity Beats Perfection
-Don't wait until everything is flawless. The market rewards those who ship, iterate, and adapt in real time.
-
-✦ 2. Build High-Leverage Systems
-If you are repeating the same manual task twice, you are leaving 80% of your growth on the table. Automate the baseline; master the edge.
-
-✦ 3. Distribution > Creation
-One great insight distributed across 5 channels beats 10 mediocre posts in a silo.
-
-✦ 4. The 1.2-Second Hook Rule
-Your first 2 lines determine 90% of your impressions. Open an immediate curiosity loop.
-
----
-
-📌 The takeaway:
-Stop overcomplicating content growth. Focus on execution, clear messaging, and relentless consistency.
-
-What is your single biggest bottleneck right now? Drop a comment below 👇
-
-#Growth #Productivity #AI #Entrepreneurship #Postryx</div>
-
-                    {{-- Hook Analyzer Container (Swapped dynamically when Hook Analyzer tab is active) --}}
+                    {{-- Hook Analyzer Container (Hidden by default) --}}
                     <div id="hook-analysis-results" style="display: none;"></div>
 
                 </div>
@@ -254,208 +229,139 @@ What is your single biggest bottleneck right now? Drop a comment below 👇
     </div>
 </section>
 
-{{-- 12 Programmatic SEO Tools Showcase Grid --}}
-<section style="padding: 60px 24px 80px; position: relative;">
-    <div style="max-width: 1280px; margin: 0 auto;">
-        
-        <div style="text-align: center; margin-bottom: 50px;">
-            <span class="badge-pill-cyan" style="margin-bottom: 12px;">Full AI Tool Suite</span>
-            <h2 style="font-size: clamp(30px, 4vw, 48px); margin-bottom: 16px;">
-                12 Dedicated AI Engines Built for <span class="gradient-text">Massive Organic Traffic</span>
-            </h2>
-            <p style="color: var(--text-secondary); max-width: 700px; margin: 0 auto; font-size: 17px;">
-                Each tool is engineered with specific platform algorithms, viral hook formulas, and SEO schema to maximize reach and conversion.
-            </p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-            @foreach($tools as $t)
-            <div class="feature-card">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                    <div class="badge-pill" style="font-size: 11px;">{{ $t['category'] }}</div>
-                    <span class="badge-pill-emerald" style="font-size: 11px;">Free Tool</span>
-                </div>
-                
-                <h3 style="font-size: 20px; color: #ffffff; margin-bottom: 10px;">{{ $t['title'] }}</h3>
-                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
-                    {{ $t['meta_description'] }}
-                </p>
-
-                <div style="border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 12px; color: var(--text-muted);">{{ count($t['features']) }} Key Features</span>
-                    <a href="{{ route('tool.show', $t['slug']) }}" class="btn-primary" style="padding: 7px 16px; font-size: 13px;">
-                        Open Tool &rarr;
-                    </a>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
+{{-- 12 Dedicated Programmatic AI Tools SEO Matrix --}}
+<section style="padding: 60px 24px 80px; max-width: 1240px; margin: 0 auto;">
+    
+    <div style="text-align: center; margin-bottom: 48px;">
+        <span class="badge-pill-cyan" style="margin-bottom: 12px;">12 Autonomous AI Engines</span>
+        <h2 style="font-size: clamp(30px, 4vw, 46px); font-weight: 800; margin-bottom: 16px;">
+            Targeted AI Engines for <span class="gradient-text">Every Growth Channel</span>
+        </h2>
+        <p style="color: var(--text-secondary); max-width: 720px; margin: 0 auto; font-size: 17px; line-height: 1.6;">
+            From LinkedIn viral carousels to Google programmatic SEO and Turnitin-proof text humanization.
+        </p>
     </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        @foreach($tools as $t)
+        <a href="{{ route('tool.show', $t['slug']) }}" class="glass-panel" style="padding: 26px; text-decoration: none; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.borderColor='rgba(99,102,241,0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border-subtle)'">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <span class="badge-pill" style="font-size: 11px;">{{ $t['badge'] }}</span>
+                    <span style="font-size: 12px; color: var(--text-muted);">{{ $t['category'] }}</span>
+                </div>
+                <h3 style="font-size: 19px; color: #fff; font-weight: 700; margin-bottom: 10px; line-height: 1.35;">{{ $t['title'] }}</h3>
+                <p style="font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">{{ $t['meta_description'] }}</p>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+                <span style="color: #6ee7b7; font-size: 12px; font-weight: 600;">✓ Free 5 Daily Credits</span>
+                <span style="color: #38bdf8; font-weight: 700; font-size: 13px;">Launch Tool &rarr;</span>
+            </div>
+        </a>
+        @endforeach
+    </div>
+
 </section>
 
-{{-- Omni-Channel 1-to-10 Repurposing Engine Demo --}}
-<section style="padding: 60px 24px 80px; background: rgba(15, 23, 42, 0.4); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
-    <div style="max-width: 1200px; margin: 0 auto;">
+{{-- Comparison Section: Postryx AI vs Generic ChatGPT --}}
+<section style="padding: 60px 24px 80px; background: rgba(15, 23, 42, 0.3); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+    <div style="max-width: 1080px; margin: 0 auto;">
         
         <div style="text-align: center; margin-bottom: 48px;">
-            <span class="badge-pill-amber" style="margin-bottom: 12px;">Omni-Channel Multiplier</span>
-            <h2 style="font-size: clamp(28px, 3.5vw, 44px); margin-bottom: 16px;">
-                The 1-to-10 Repurposing Machine: <span class="gradient-text-purple">1 Topic &rarr; 5 Platforms</span>
+            <span class="badge-pill" style="margin-bottom: 12px;">Algorithmic Superiority</span>
+            <h2 style="font-size: clamp(28px, 3.8vw, 44px); font-weight: 800; margin-bottom: 14px;">
+                Why Postryx AI Outperforms <span class="gradient-text">Generic ChatGPT</span>
             </h2>
-            <p style="color: var(--text-secondary); max-width: 720px; margin: 0 auto; font-size: 16px;">
-                Never create content from scratch for each platform. Let Postryx transform your core insight into perfectly formatted posts for LinkedIn, Twitter, Instagram, Email, and Reels in under 60 seconds.
+            <p style="color: var(--text-secondary); font-size: 16px; max-width: 700px; margin: 0 auto;">
+                Generic LLMs produce robotic, flagged text. Postryx is engineered specifically for social dwell-time and Google ranking algorithms.
             </p>
         </div>
 
-        <div class="glass-panel" style="padding: 32px;">
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
-                <input type="text" id="repurpose-input" class="postryx-input" style="flex: 1; min-width: 280px;" value="How to scale organic search traffic using programmatic SEO and AI content hubs in 2026" placeholder="Enter any topic or blog link...">
-                <button id="repurpose-btn" onclick="Postryx.repurpose(document.getElementById('repurpose-input').value)" class="btn-glow-cyan btn-primary" style="padding: 12px 24px; font-weight: 700;">
-                    Repurpose Across 5 Platforms 🚀
-                </button>
-            </div>
-
-            <div id="repurpose-results">
-                <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-                    <div style="font-size: 32px; margin-bottom: 12px;">🔄</div>
-                    <div style="font-size: 15px; color: var(--text-secondary);">Click "Repurpose Across 5 Platforms" above to generate tailored multi-channel assets in real-time!</div>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-</section>
-
-{{-- Interactive ROI & Time Savings Calculator --}}
-<section style="padding: 70px 24px 80px;">
-    <div style="max-width: 1100px; margin: 0 auto;">
-        
-        <div style="text-align: center; margin-bottom: 48px;">
-            <span class="badge-pill-emerald" style="margin-bottom: 12px;">Revenue &amp; Time Impact</span>
-            <h2 style="font-size: clamp(28px, 3.5vw, 44px); margin-bottom: 16px;">
-                Calculate Your <span class="gradient-text-cyan">Monthly Time &amp; Cost Savings</span>
-            </h2>
-            <p style="color: var(--text-secondary); max-width: 680px; margin: 0 auto; font-size: 16px;">
-                See how much time and money Postryx AI saves your agency, startup, or creator business each month.
-            </p>
-        </div>
-
-        <div class="glass-panel" style="padding: 36px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; align-items: center;">
-                
-                {{-- Sliders Column --}}
-                <div style="display: flex; flex-direction: column; gap: 28px;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <label style="font-weight: 600; font-size: 14px;">Posts &amp; Articles Created / Month:</label>
-                            <span id="roi-posts-count" style="font-weight: 700; color: #38bdf8;">30 posts / mo</span>
-                        </div>
-                        <input type="range" id="roi-posts-slider" class="roi-slider" min="5" max="200" value="30" oninput="Postryx.updateRoi()">
-                    </div>
-
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <label style="font-weight: 600; font-size: 14px;">Your Hourly Time / Agency Cost Rate:</label>
-                            <span id="roi-rate-count" style="font-weight: 700; color: #a855f7;">₹2,500 / hr ($30)</span>
-                        </div>
-                        <input type="range" id="roi-rate-slider" class="roi-slider" min="500" max="10000" step="250" value="2500" oninput="Postryx.updateRoi()">
-                    </div>
-
-                    <div style="font-size: 13px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
-                        💡 <em>Based on industry average of 2.3 hours spent per high-quality post drafted, researched, and formatted manually.</em>
-                    </div>
-                </div>
-
-                {{-- Computed Output Numbers Column --}}
-                <div style="background: rgba(11, 17, 33, 0.9); border: 1px solid var(--border-active); border-radius: 16px; padding: 28px; text-align: center;">
-                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Time Reclaimed Monthly</div>
-                    <div id="roi-hours-saved" style="font-size: 48px; font-weight: 800; color: #38bdf8; line-height: 1.1; margin-bottom: 20px;">69 hrs</div>
-
-                    <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Estimated Monthly Value Saved</div>
-                    <div id="roi-money-saved" style="font-size: 42px; font-weight: 800; color: #10b981; line-height: 1.1; margin-bottom: 24px;">₹1,72,500</div>
-
-                    <a href="{{ route('pricing') }}" class="btn-primary" style="width: 100%; padding: 12px;">
-                        Claim Postryx Pro Plan &rarr;
-                    </a>
-                </div>
-
+        <div class="glass-panel" style="padding: 0; overflow: hidden;">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                    <thead>
+                        <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border-subtle);">
+                            <th style="padding: 18px 24px; color: #fff; font-weight: 700;">Growth Feature</th>
+                            <th style="padding: 18px 24px; color: #38bdf8; font-weight: 700;">Postryx AI Autonomous Engine</th>
+                            <th style="padding: 18px 24px; color: var(--text-muted); font-weight: 600;">Generic ChatGPT / Prompts</th>
+                        </tr>
+                    </thead>
+                    <tbody style="color: var(--text-secondary);">
+                        <tr style="border-bottom: 1px solid var(--border-subtle);">
+                            <td style="padding: 16px 24px; font-weight: 600; color: #fff;">Viral Hook Formats</td>
+                            <td style="padding: 16px 24px; color: #10b981; font-weight: 600;">✓ 5 Algorithmic Hook Formulas (Contrarian, Data, Story)</td>
+                            <td style="padding: 16px 24px; color: #ef4444;">✗ Predictable, generic openers</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-subtle);">
+                            <td style="padding: 16px 24px; font-weight: 600; color: #fff;">AI Detector Bypass Rate</td>
+                            <td style="padding: 16px 24px; color: #10b981; font-weight: 600;">✓ 99.4% Pass (GPTZero, Turnitin, CopyLeaks)</td>
+                            <td style="padding: 16px 24px; color: #ef4444;">✗ Flagged 80%+ as AI generated</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-subtle);">
+                            <td style="padding: 16px 24px; font-weight: 600; color: #fff;">Social Media Formatting</td>
+                            <td style="padding: 16px 24px; color: #10b981; font-weight: 600;">✓ Mobile whitespace, Unicode bolding, arrows (→)</td>
+                            <td style="padding: 16px 24px; color: #ef4444;">✗ Unformatted dense walls of text</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-subtle);">
+                            <td style="padding: 16px 24px; font-weight: 600; color: #fff;">SEO &amp; JSON-LD Schema</td>
+                            <td style="padding: 16px 24px; color: #10b981; font-weight: 600;">✓ Built-in H1-H3 hierarchy &amp; Google FAQ Schema</td>
+                            <td style="padding: 16px 24px; color: #ef4444;">✗ Requires manual coding &amp; markup</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 16px 24px; font-weight: 600; color: #fff;">Multi-Channel Repurposing</td>
+                            <td style="padding: 16px 24px; color: #10b981; font-weight: 600;">✓ 1-Click Cascade to 5 Platforms simultaneously</td>
+                            <td style="padding: 16px 24px; color: #ef4444;">✗ Requires 5 separate custom prompts</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
     </div>
 </section>
 
-{{-- Feature Comparison Matrix --}}
-<section style="padding: 60px 24px 80px; background: rgba(15, 23, 42, 0.3);">
-    <div style="max-width: 1100px; margin: 0 auto;">
-        
-        <div style="text-align: center; margin-bottom: 44px;">
-            <h2 style="font-size: clamp(26px, 3vw, 40px); margin-bottom: 14px;">
-                Why Top Creators Choose <span class="gradient-text">Postryx AI</span>
+{{-- Pillar Blog Resources & Guides Section --}}
+<section style="padding: 70px 24px 80px; max-width: 1240px; margin: 0 auto;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 40px;">
+        <div>
+            <span class="badge-pill-cyan" style="margin-bottom: 10px;">Organic Growth Playbooks</span>
+            <h2 style="font-size: clamp(28px, 3.5vw, 42px); font-weight: 800; color: #fff;">
+                SEO Blueprints &amp; <span class="gradient-text">Algorithm Teardowns</span>
             </h2>
-            <p style="color: var(--text-secondary); font-size: 16px;">
-                See how Postryx compares to generic LLM chatbots and expensive legacy copywriting software.
-            </p>
         </div>
+        <a href="{{ route('blog.index') }}" style="color: #38bdf8; font-weight: 700; text-decoration: none; font-size: 15px;">
+            View All Guides &rarr;
+        </a>
+    </div>
 
-        <div class="glass-panel" style="overflow-x: auto; padding: 0;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-                <thead>
-                    <tr style="border-bottom: 1px solid var(--border-subtle); background: rgba(0,0,0,0.3);">
-                        <th style="padding: 18px 24px; color: var(--text-secondary); font-weight: 600;">Feature / Capability</th>
-                        <th style="padding: 18px 24px; color: #38bdf8; font-weight: 700; background: rgba(99,102,241,0.1);">Postryx AI</th>
-                        <th style="padding: 18px 24px; color: var(--text-muted);">ChatGPT Plus</th>
-                        <th style="padding: 18px 24px; color: var(--text-muted);">Jasper AI ($59/mo)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 16px 24px; font-weight: 600; color: #fff;">Viral Hook Velocity Scoring</td>
-                        <td style="padding: 16px 24px; color: #10b981; font-weight: 700; background: rgba(99,102,241,0.05);">✓ Built-in (0-100 score)</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ No</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ No</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 16px 24px; font-weight: 600; color: #fff;">AI Detection Bypass (99.4% Human)</td>
-                        <td style="padding: 16px 24px; color: #10b981; font-weight: 700; background: rgba(99,102,241,0.05);">✓ Automated Humanizer</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ Flagged as 100% AI</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ Often Flagged</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 16px 24px; font-weight: 600; color: #fff;">1-Click 5-Platform Repurposer</td>
-                        <td style="padding: 16px 24px; color: #10b981; font-weight: 700; background: rgba(99,102,241,0.05);">✓ 1-Click Omni Engine</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ Requires manual prompts</td>
-                        <td style="padding: 16px 24px; color: #f59e0b;">Limited</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--border-subtle);">
-                        <td style="padding: 16px 24px; font-weight: 600; color: #fff;">HTML5 Social Card Graphic Export</td>
-                        <td style="padding: 16px 24px; color: #10b981; font-weight: 700; background: rgba(99,102,241,0.05);">✓ Built-in Canvas Exporter</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ No</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ No</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 16px 24px; font-weight: 600; color: #fff;">Free Daily Tier Without Login</td>
-                        <td style="padding: 16px 24px; color: #10b981; font-weight: 700; background: rgba(99,102,241,0.05);">✓ 5 Free Daily Credits</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ Account Required</td>
-                        <td style="padding: 16px 24px; color: #f43f5e;">✕ Credit Card Required</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        @foreach($blogPosts as $slug => $bp)
+        <a href="{{ route('blog.show', $bp['slug']) }}" class="glass-panel" style="padding: 24px; text-decoration: none; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <span class="badge-pill" style="font-size: 11px;">{{ $bp['category'] }}</span>
+                    <span style="font-size: 12px; color: var(--text-muted);">{{ $bp['read_time'] }}</span>
+                </div>
+                <h3 style="font-size: 18px; color: #fff; font-weight: 700; line-height: 1.35; margin-bottom: 10px;">{{ $bp['title'] }}</h3>
+                <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px;">{{ $bp['excerpt'] }}</p>
+            </div>
+            <div style="color: #38bdf8; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+                <span>Read Playbook</span>
+                <span>&rarr;</span>
+            </div>
+        </a>
+        @endforeach
     </div>
 </section>
 
 {{-- Pricing Section --}}
-<section id="pricing-section" style="padding: 70px 24px 80px;">
+<section id="pricing-section" style="padding: 70px 24px 80px; background: rgba(15, 23, 42, 0.2); border-top: 1px solid var(--border-subtle);">
     <div style="max-width: 1200px; margin: 0 auto;">
         
         <div style="text-align: center; margin-bottom: 48px;">
             <span class="badge-pill" style="margin-bottom: 12px;">Simple, High-ROI Pricing</span>
-            <h2 style="font-size: clamp(30px, 4vw, 48px); margin-bottom: 16px;">
+            <h2 style="font-size: clamp(30px, 4vw, 48px); font-weight: 800; margin-bottom: 16px;">
                 Invest in Your <span class="gradient-text">Organic Reach Engine</span>
             </h2>
             <p style="color: var(--text-secondary); max-width: 680px; margin: 0 auto; font-size: 17px;">
@@ -537,12 +443,15 @@ What is your single biggest bottleneck right now? Drop a comment below 👇
 </section>
 
 {{-- FAQ Section with Accordion --}}
-<section style="padding: 60px 24px 80px; max-width: 900px; margin: 0 auto;">
+<section style="padding: 60px 24px 80px; max-width: 920px; margin: 0 auto;">
     <div style="text-align: center; margin-bottom: 44px;">
         <span class="badge-pill-cyan" style="margin-bottom: 12px;">Frequently Asked Questions</span>
-        <h2 style="font-size: clamp(28px, 3.5vw, 42px); margin-bottom: 14px;">
-            Got Questions? We Have Answers.
+        <h2 style="font-size: clamp(28px, 3.5vw, 42px); font-weight: 800; margin-bottom: 14px;">
+            Search Engine &amp; Platform FAQs
         </h2>
+        <p style="color: var(--text-secondary); font-size: 15px;">
+            Everything you need to know about Postryx AI and viral content ranking.
+        </p>
     </div>
 
     <div class="faq-item active">
@@ -584,6 +493,43 @@ What is your single biggest bottleneck right now? Drop a comment below 👇
             When you join the Postryx Affiliate Program, you receive a unique referral link. You earn a 30% recurring monthly commission for the entire lifetime of every subscriber who signs up through your link.
         </div>
     </div>
+
+    <div class="faq-item">
+        <div class="faq-header" onclick="Postryx.toggleFaq(this)">
+            <span>How does Programmatic SEO help websites rank on Google?</span>
+            <span style="color: #6366f1;">▼</span>
+        </div>
+        <div class="faq-body">
+            Programmatic SEO allows you to target hundreds of high-intent long-tail keywords using structured, intent-satisfying landing pages with embedded FAQPage schema, semantic headers, and interactive utility tools.
+        </div>
+    </div>
+</section>
+
+{{-- SEO Keyword Hub & Quick Directory --}}
+<section style="padding: 40px 24px 70px; max-width: 1200px; margin: 0 auto; border-top: 1px solid var(--border-subtle);">
+    <div style="text-align: center; margin-bottom: 24px;">
+        <span class="badge-pill" style="font-size: 11px;">SEO Discovery Hub</span>
+        <h3 style="font-size: 20px; color: #fff; margin-top: 8px;">Popular AI Content &amp; SEO Growth Keywords</h3>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
+        <a href="{{ route('tool.show', 'linkedin-post-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">AI LinkedIn Post Generator</a>
+        <a href="{{ route('tool.show', 'linkedin-post-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">LinkedIn Carousel Generator</a>
+        <a href="{{ route('tool.show', 'viral-tweet-thread-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">Twitter Thread Maker</a>
+        <a href="{{ route('tool.show', 'viral-tweet-thread-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">X Viral Hooks</a>
+        <a href="{{ route('tool.show', 'ai-content-humanizer') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">Bypass AI Detection</a>
+        <a href="{{ route('tool.show', 'ai-content-humanizer') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">AI Content Humanizer Free</a>
+        <a href="{{ route('tool.show', 'ai-seo-blog-writer') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">Programmatic SEO Writer</a>
+        <a href="{{ route('tool.show', 'ai-seo-blog-writer') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">Long-form SEO Article Generator</a>
+        <a href="{{ route('tool.show', 'viral-headline-analyzer') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">Viral Headline Analyzer</a>
+        <a href="{{ route('tool.show', 'instagram-caption-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">AI Instagram Caption Generator</a>
+        <a href="{{ route('tool.show', 'tiktok-reels-script-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">TikTok Reels Script Engine</a>
+        <a href="{{ route('tool.show', 'content-repurposer') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">1-Click Content Repurposer</a>
+        <a href="{{ route('tool.show', 'cold-email-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">B2B Cold Email Generator</a>
+        <a href="{{ route('tool.show', 'ai-ad-copy-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">AI Ad Copy Generator for Meta & Google</a>
+        <a href="{{ route('tool.show', 'hashtag-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">Viral Hashtag Finder</a>
+        <a href="{{ route('tool.show', 'youtube-title-and-script-generator') }}" class="badge-pill" style="text-decoration: none; font-size: 12px; color: #cbd5e1;">YouTube Shorts Script Writer</a>
+    </div>
 </section>
 
 @endsection
@@ -611,6 +557,10 @@ What is your single biggest bottleneck right now? Drop a comment below 👇
             inputLabel.textContent = 'Paste AI-Generated Text to Humanize:';
             topicInput.placeholder = 'Paste text from ChatGPT, Claude, or Gemini...';
             toneControls.style.display = 'none';
+        } else if (tool === 'repurpose') {
+            inputLabel.textContent = 'Enter Core Idea or Note to Repurpose:';
+            topicInput.placeholder = 'Paste article summary or topic to generate LinkedIn, Twitter, Reels, and Email...';
+            toneControls.style.display = 'none';
         } else {
             inputLabel.textContent = 'Enter Your Topic or Core Insight:';
             topicInput.placeholder = 'e.g. 5 counter-intuitive lessons learned scaling a digital business...';
@@ -631,7 +581,8 @@ What is your single biggest bottleneck right now? Drop a comment below 👇
 
     function executeStudioGeneration() {
         const topic = document.getElementById('studio-topic-input').value;
-        const tone = document.getElementById('studio-tone-select').value;
+        const toneSelect = document.getElementById('studio-tone-select');
+        const tone = toneSelect ? toneSelect.value : 'engaging';
         const outputBox = document.getElementById('postryx-output');
         const hookResults = document.getElementById('hook-analysis-results');
 
@@ -643,6 +594,10 @@ What is your single biggest bottleneck right now? Drop a comment below 👇
             outputBox.style.display = 'block';
             hookResults.style.display = 'none';
             Postryx.humanize(topic, 'conversational', 'postryx-output', 'postryx-generate-btn');
+        } else if (activeStudioTool === 'repurpose') {
+            outputBox.style.display = 'none';
+            hookResults.style.display = 'block';
+            Postryx.repurpose(topic, 'hook-analysis-results', 'postryx-generate-btn');
         } else {
             outputBox.style.display = 'block';
             hookResults.style.display = 'none';

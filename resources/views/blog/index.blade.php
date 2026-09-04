@@ -2,6 +2,7 @@
 
 @section('title', 'Viral Growth & Programmatic SEO Blog | Postryx AI')
 @section('meta_description', 'In-depth guides, algorithm breakdowns, and actionable case studies on viral social media, programmatic SEO, AI humanization, and organic audience growth.')
+@section('meta_keywords', 'viral growth blog, programmatic SEO guide, AI LinkedIn algorithm 2026, bypass AI detectors guide, Twitter X growth playbook, content repurposing formula, postryx.in')
 
 @section('content')
 
@@ -19,7 +20,7 @@
 
 {{-- Blog Grid --}}
 <section style="padding: 20px 24px 80px; max-width: 1240px; margin: 0 auto;">
-    @if($posts->count() > 0)
+    @if(isset($posts) && $posts->count() > 0)
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 32px;">
         @foreach($posts as $post)
         <article class="glass-panel" style="display: flex; flex-direction: column; overflow: hidden; padding: 0; transition: transform 0.3s ease;">
@@ -41,7 +42,7 @@
                 </div>
                 @endif
 
-                <h2 style="font-size: 20px; line-height: 1.35; color: #fff; margin-bottom: 12px;">
+                <h2 style="font-size: 20px; line-height: 1.35; color: #fff; margin-bottom: 12px; font-weight: 700;">
                     <a href="{{ route('blog.show', $post->slug) }}" style="color: inherit; text-decoration: none;">
                         {{ $post->title }}
                     </a>
@@ -66,8 +67,46 @@
     </div>
 
     {{-- Pagination --}}
+    @if(method_exists($posts, 'links'))
     <div style="margin-top: 40px; display: flex; justify-content: center;">
         {{ $posts->links() }}
+    </div>
+    @endif
+    @elseif(isset($staticPosts) && count($staticPosts) > 0)
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 32px;">
+        @foreach($staticPosts as $slug => $sp)
+        <article class="glass-panel" style="display: flex; flex-direction: column; overflow: hidden; padding: 0; transition: transform 0.3s ease;">
+            
+            {{-- Featured Image --}}
+            <a href="{{ route('blog.show', $sp['slug']) }}" style="display: block; overflow: hidden; max-height: 200px; position: relative;">
+                <img src="{{ asset('images/postryx-hero-banner.png') }}" alt="{{ $sp['title'] }}" style="width: 100%; height: 200px; object-fit: cover; transition: transform 0.4s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <span class="badge-pill" style="position: absolute; top: 14px; left: 14px; font-size: 11px; background: rgba(6, 9, 15, 0.85); backdrop-filter: blur(8px);">{{ $sp['category'] }}</span>
+            </a>
+
+            <div style="padding: 24px; display: flex; flex-direction: column; flex: 1;">
+                
+                <h2 style="font-size: 20px; line-height: 1.35; color: #fff; margin-bottom: 12px; font-weight: 700;">
+                    <a href="{{ route('blog.show', $sp['slug']) }}" style="color: inherit; text-decoration: none;">
+                        {{ $sp['title'] }}
+                    </a>
+                </h2>
+
+                <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+                    {{ $sp['excerpt'] }}
+                </p>
+
+                <div style="border-top: 1px solid var(--border-subtle); padding-top: 16px; margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        By <strong style="color:#e2e8f0;">{{ $sp['author'] }}</strong> • {{ $sp['read_time'] }}
+                    </div>
+                    <a href="{{ route('blog.show', $sp['slug']) }}" style="color: #38bdf8; font-weight: 700; font-size: 13px; text-decoration: none;">
+                        Read Guide &rarr;
+                    </a>
+                </div>
+
+            </div>
+        </article>
+        @endforeach
     </div>
     @else
     <div class="glass-panel" style="padding: 60px 24px; text-align: center;">

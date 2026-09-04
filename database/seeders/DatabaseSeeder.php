@@ -55,5 +55,11 @@ class DatabaseSeeder extends Seeder
                 'paid_payout' => 10082.80
             ]
         );
+
+        // 3. SEO Pillar Blog Guides
+        $this->call(BlogSeeder::class);
+
+        // 4. Digital Invitation Platform Seeder
+        $this->call(InvitationPlatformSeeder::class);
     }
 }

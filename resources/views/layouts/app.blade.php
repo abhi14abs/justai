@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Google Analytics 4 (GA4) Tracking --}}
     @php
@@ -48,6 +49,7 @@
     {{-- Browser & Mobile OS Meta --}}
     <meta name="theme-color" content="#030712">
     <meta name="msapplication-TileColor" content="#030712">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Postryx AI">
@@ -235,6 +237,10 @@
                     </div>
                 </div>
 
+                <a href="{{ route('invitations.browse.index') }}" class="nav-link {{ request()->routeIs('invitations.*') ? 'active' : '' }}" style="color: #FDE68A; font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                    <span>💌 Digital Invites</span>
+                    <span style="font-size: 9px; padding: 2px 6px; border-radius: 4px; background: rgba(212,175,55,0.3); color: #FDE68A; font-weight: 800;">NEW</span>
+                </a>
                 <a href="{{ route('pricing') }}" class="nav-link {{ request()->routeIs('pricing') ? 'active' : '' }}">Pricing & ROI</a>
                 <a href="{{ route('blog.index') }}" class="nav-link {{ request()->routeIs('blog.*') ? 'active' : '' }}">SEO Guides</a>
                 <a href="{{ route('affiliate') }}" class="nav-link {{ request()->routeIs('affiliate') ? 'active' : '' }}">Affiliates (30%)</a>
@@ -243,6 +249,9 @@
             {{-- Desktop Actions & Auth Navigation --}}
             <div class="nav-actions-desktop" style="display: flex; align-items: center; gap: 10px;">
                 @if(Auth::check())
+                    <a href="{{ route('invitations.dashboard.index') }}" class="nav-link" style="color: #FDE68A; font-weight: 600;">
+                        💌 My Invites
+                    </a>
                     <a href="{{ route('dashboard') }}" class="nav-link" style="color: #38bdf8; font-weight: 600;">
                         Dashboard
                     </a>
@@ -320,6 +329,9 @@
                 </div>
             </div>
 
+            <a href="{{ route('invitations.browse.index') }}" class="mobile-nav-link {{ request()->routeIs('invitations.*') ? 'active' : '' }}" style="color: #FDE68A; font-weight: 700;">
+                💌 Digital Invites <span class="badge-pill" style="font-size: 9px; padding: 1px 5px; background: rgba(212,175,55,0.3); color: #FDE68A;">NEW</span>
+            </a>
             <a href="{{ route('pricing') }}" class="mobile-nav-link {{ request()->routeIs('pricing') ? 'active' : '' }}">
                 💰 Pricing &amp; ROI
             </a>
