@@ -6,8 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Builder — {{ $invitation->title }} | CelebrateAI</title>
 
-    <link rel="stylesheet" href="{{ asset('css/postryx-theme.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/invitations-market.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/postryx-theme.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/invitations-market.css') }}?v={{ time() }}">
+    <script>window.BUILDER_INVITATION_ID = {{ $invitation->id }};</script>
+    <script src="{{ asset('js/invitations-builder.js') }}?v={{ time() }}"></script>
     
     <style>
         .section-toggle-switch {
@@ -92,8 +94,11 @@
             </button>
         </div>
 
-        {{-- Actions: Save & Publish --}}
+        {{-- Actions: Save Draft & Publish --}}
         <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" id="btn-top-save-draft" onclick="saveMasterDraft()" class="btn-secondary" style="padding: 7px 16px; font-size: 12px; font-weight: 700; background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.4); color: #FDE68A;">
+                <span>💾 Save Draft</span>
+            </button>
             <a href="{{ route('invitations.public.show', $invitation->slug) }}" target="_blank" class="btn-secondary" style="padding: 7px 14px; font-size: 12px; text-decoration: none;">
                 👁️ View Live Link
             </a>
@@ -109,33 +114,60 @@
         {{-- LEFT SIDE CONFIGURATION PANEL --}}
         <aside class="builder-sidebar">
             
-            {{-- Tabs Navigation --}}
-            <nav class="builder-tabs-nav">
-                <button type="button" class="builder-tab-btn active" onclick="switchBuilderTab('basics', this)">
-                    <span>⚙️</span><span>Basics</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('theme', this)">
-                    <span>🎨</span><span>Design</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('sections', this)">
-                    <span>📑</span><span>Sections</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('events', this)">
-                    <span>📅</span><span>Events</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('rsvp', this)">
-                    <span>📝</span><span>RSVP</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('media', this)">
-                    <span>🎵</span><span>Media</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('ai', this)">
-                    <span>🪄</span><span>AI Studio</span>
-                </button>
-                <button type="button" class="builder-tab-btn" onclick="switchBuilderTab('publish', this)">
-                    <span>💎</span><span>Pricing</span>
-                </button>
-            </nav>
+            {{-- Step Indicator & Progress --}}
+            <div class="builder-step-header">
+                <div class="builder-step-info">
+                    <span class="builder-step-badge" id="builder-step-badge">Step 1 of 9</span>
+                    <span class="builder-step-title" id="builder-step-title">General Information</span>
+                </div>
+                <div class="builder-progress-track">
+                    <div class="builder-progress-fill" id="builder-progress-fill" style="width: 11.11%;"></div>
+                </div>
+            </div>
+
+            {{-- Tabs Navigation Bar with Scroll Buttons --}}
+            <div class="builder-tabs-wrapper">
+                <button type="button" class="builder-tab-scroll-btn" onclick="scrollTabNav(-1)" title="Scroll Left">‹</button>
+                <nav class="builder-tabs-nav" id="builder-tabs-nav">
+                    <button type="button" class="builder-tab-btn active" id="tab-btn-basics" onclick="switchBuilderTab('basics', this)">
+                        <span class="builder-tab-num">1</span>
+                        <span>⚙️ Basics</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-theme" onclick="switchBuilderTab('theme', this)">
+                        <span class="builder-tab-num">2</span>
+                        <span>🎨 Design</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-location" onclick="switchBuilderTab('location', this)">
+                        <span class="builder-tab-num">3</span>
+                        <span>📍 Location</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-sections" onclick="switchBuilderTab('sections', this)">
+                        <span class="builder-tab-num">4</span>
+                        <span>📑 Sections</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-events" onclick="switchBuilderTab('events', this)">
+                        <span class="builder-tab-num">5</span>
+                        <span>📅 Events</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-rsvp" onclick="switchBuilderTab('rsvp', this)">
+                        <span class="builder-tab-num">6</span>
+                        <span>📝 RSVP</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-media" onclick="switchBuilderTab('media', this)">
+                        <span class="builder-tab-num">7</span>
+                        <span>🎵 Media</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-ai" onclick="switchBuilderTab('ai', this)">
+                        <span class="builder-tab-num">8</span>
+                        <span>🪄 AI Studio</span>
+                    </button>
+                    <button type="button" class="builder-tab-btn" id="tab-btn-publish" onclick="switchBuilderTab('publish', this)">
+                        <span class="builder-tab-num">9</span>
+                        <span>💎 Pricing</span>
+                    </button>
+                </nav>
+                <button type="button" class="builder-tab-scroll-btn" onclick="scrollTabNav(1)" title="Scroll Right">›</button>
+            </div>
 
             {{-- TAB 1: BASICS --}}
             <div class="builder-tab-pane active" id="tab-basics">
@@ -143,7 +175,7 @@
                 
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 6px;">Invitation Title</label>
-                    <input type="text" id="opt-title" value="{{ $invitation->title }}" class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+                    <input type="text" id="opt-title" value="{{ $invitation->title }}" class="form-control" oninput="syncLiveText('hero-title', this.value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
                 </div>
 
                 <div style="margin-bottom: 16px;">
@@ -160,27 +192,116 @@
                 </div>
 
                 <div style="margin-bottom: 24px;">
-                    <label style="display: block; font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 6px;">Cover Banner Image URL</label>
-                    <input type="text" id="opt-cover-image" value="{{ $invitation->cover_image }}" placeholder="https://images.unsplash.com/..." class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #94A3B8;">Cover / Background Image</label>
+                        <span style="font-size: 11px; color: var(--gold-primary);">Auto-converts Unsplash &amp; Drive links</span>
+                    </div>
+
+                    {{-- Local File Upload Button --}}
+                    <input type="file" id="cover-image-file-input" accept="image/*" style="display: none;" onchange="handleCoverImageUpload(this)">
+                    <button type="button" onclick="document.getElementById('cover-image-file-input').click()" class="btn-secondary" style="width: 100%; padding: 9px 14px; font-size: 12px; font-weight: 700; margin-bottom: 8px; border-radius: 10px; border: 1px dashed rgba(212,175,55,0.5); background: rgba(212,175,55,0.08); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span>📁 Upload Photo from Device</span>
+                    </button>
+
+                    {{-- Image URL Input with Auto-Normalizer --}}
+                    <input type="text" id="opt-cover-image" value="{{ $invitation->cover_image }}" placeholder="Paste any image URL or Unsplash link..." class="form-control" oninput="handleCoverImageInput(this)" onchange="handleCoverImageInput(this)" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+
+                    {{-- Background Opacity Slider --}}
+                    @php
+                        $curOpacityPercent = $invitation->bg_opacity_percent ?? 45;
+                    @endphp
+                    <div style="margin-top: 12px; background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 4px;">
+                            <span>Background Image Visibility</span>
+                            <span id="val-bg-opacity" style="color: var(--gold-primary); font-weight: 700;">{{ $curOpacityPercent }}%</span>
+                        </div>
+                        <input type="range" id="opt-bg-opacity" min="0" max="100" value="{{ $curOpacityPercent }}" oninput="handleBgOpacityChange(this.value)" style="width: 100%; accent-color: var(--gold-primary); cursor: pointer;">
+                    </div>
                 </div>
 
-                <button type="button" onclick="saveBasics()" class="btn-primary" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 10px;">
-                    <span>Save Basics 💾</span>
-                </button>
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <div></div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-save-basics" onclick="saveBasics()" class="btn-secondary" style="padding: 10px 16px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                            💾 Save Basics
+                        </button>
+                        <button type="button" id="btn-next-basics" onclick="saveBasicsAndNext()" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                            Save &amp; Continue: Design 🎨 &rarr;
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {{-- TAB 2: THEME & STYLING --}}
+            {{-- TAB 2: THEME, BACKGROUND & CARD STYLING --}}
             <div class="builder-tab-pane" id="tab-theme">
-                <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">Color Palette &amp; Typography</h3>
+                <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">Design, Colors &amp; Backgrounds</h3>
 
+                {{-- Primary Colors --}}
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                     <div>
                         <label style="display: block; font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 6px;">Primary Gold/Accent</label>
-                        <input type="color" id="opt-primary-color" value="{{ $invitation->primary_color ?? '#D4AF37' }}" onchange="updateThemeVar('--invite-primary', this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                        <input type="color" id="opt-primary-color" value="{{ $invitation->primary_color ?? '#D4AF37' }}" oninput="updateThemeVar('--invite-primary', this.value); updateThemeVar('--gold-primary', this.value);" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
                     </div>
                     <div>
-                        <label style="display: block; font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 6px;">Background Tone</label>
-                        <input type="color" id="opt-secondary-color" value="{{ $invitation->secondary_color ?? '#0F172A' }}" onchange="updateThemeVar('--invite-secondary', this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                        <label style="display: block; font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 6px;">Page Background Color</label>
+                        <input type="color" id="opt-secondary-color" value="{{ $invitation->secondary_color ?? '#0F172A' }}" oninput="updatePageBg(this.value, document.getElementById('opt-cover-image').value, (document.getElementById('opt-bg-opacity')?.value || 45) / 100);" style="width: 100%; height: 42px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                    </div>
+                </div>
+
+                {{-- Luxury Texture Presets --}}
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #94A3B8;">Luxury Texture Presets</label>
+                        <button type="button" onclick="document.getElementById('cover-image-file-input').click()" style="background: none; border: none; font-size: 11px; color: var(--gold-primary); cursor: pointer; text-decoration: underline;">
+                            + Upload Custom
+                        </button>
+                    </div>
+                    <div class="bg-preset-grid">
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80')">✨ Gold Silk</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1200&q=80')">🌸 Petals</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80')">🌌 Midnight</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80')">🏛️ Palace</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80')">👑 Regal Dark</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80')">🌿 Botanical</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=300&q=80') center/cover;" onclick="setBgTexture('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80')">🎨 Damask</button>
+                        <button type="button" class="bg-preset-item" style="background: linear-gradient(135deg, #1E293B, #0F172A);" onclick="setBgTexture('')">🚫 Clear BG</button>
+                    </div>
+                </div>
+
+                {{-- Background Opacity Slider (Synced in Design Tab) --}}
+                <div style="margin-bottom: 16px; background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: #94A3B8; margin-bottom: 4px;">
+                        <span>Background Image Visibility</span>
+                        <span id="val-bg-opacity-design" style="color: var(--gold-primary); font-weight: 700;">{{ $curOpacityPercent }}%</span>
+                    </div>
+                    <input type="range" id="opt-bg-opacity-design" min="0" max="100" value="{{ $curOpacityPercent }}" oninput="handleBgOpacityChange(this.value)" style="width: 100%; accent-color: var(--gold-primary); cursor: pointer;">
+                </div>
+
+                {{-- Global Card Styling --}}
+                <div class="glass-panel" style="padding: 16px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px;">
+                    <div style="font-size: 12px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 10px;">Global Cards Customization</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #94A3B8; margin-bottom: 4px;">Card Background Color</label>
+                            <input type="color" id="opt-card-bg-color" value="#0F172A" oninput="updateCardStyle(this.value, document.getElementById('opt-card-border-color').value, document.getElementById('opt-card-text-color').value, document.getElementById('opt-card-radius').value)" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #94A3B8; margin-bottom: 4px;">Card Border Color</label>
+                            <input type="color" id="opt-card-border-color" value="#D4AF37" oninput="updateCardStyle(document.getElementById('opt-card-bg-color').value, this.value, document.getElementById('opt-card-text-color').value, document.getElementById('opt-card-radius').value)" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #94A3B8; margin-bottom: 4px;">Card Text Color</label>
+                            <input type="color" id="opt-card-text-color" value="#E2E8F0" oninput="updateCardStyle(document.getElementById('opt-card-bg-color').value, document.getElementById('opt-card-border-color').value, this.value, document.getElementById('opt-card-radius').value)" style="width: 100%; height: 38px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; color: #94A3B8; margin-bottom: 4px;">Corner Radius (px)</label>
+                            <input type="number" id="opt-card-radius" value="20" min="0" max="40" oninput="updateCardStyle(document.getElementById('opt-card-bg-color').value, document.getElementById('opt-card-border-color').value, document.getElementById('opt-card-text-color').value, this.value)" style="width: 100%; padding: 8px 10px; border-radius: 6px; background: #0F172A; border: 1px solid rgba(255,255,255,0.2); color: #FFF; font-size: 12px;">
+                        </div>
                     </div>
                 </div>
 
@@ -199,28 +320,126 @@
                     <select id="opt-animation-style" class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
                         <option value="sparkles_float" {{ $invitation->animation_style === 'sparkles_float' ? 'selected' : '' }}>✨ Floating Golden Sparkles</option>
                         <option value="petals_fall" {{ $invitation->animation_style === 'petals_fall' ? 'selected' : '' }}>🌸 Falling Rose Petals</option>
+                        <option value="marigold_shower" {{ $invitation->animation_style === 'marigold_shower' ? 'selected' : '' }}>🌼 Auspicious Marigold Shower</option>
+                        <option value="diya_sparkle" {{ $invitation->animation_style === 'diya_sparkle' ? 'selected' : '' }}>🪔 Divine Glowing Diyas</option>
                         <option value="confetti" {{ $invitation->animation_style === 'confetti' ? 'selected' : '' }}>🎉 Party Confetti Burst</option>
                         <option value="golden_shimmer" {{ $invitation->animation_style === 'golden_shimmer' ? 'selected' : '' }}>🌟 Subtle Luxury Shimmer</option>
                     </select>
                 </div>
 
-                <button type="button" onclick="saveDesign()" class="btn-primary" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 10px;">
-                    <span>Update Design ✨</span>
-                </button>
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('basics')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to Basics
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-save-design" onclick="saveDesign()" class="btn-secondary" style="padding: 10px 16px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                            💾 Save Design
+                        </button>
+                        <button type="button" id="btn-next-design" onclick="saveDesignAndNext()" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                            Save &amp; Continue: Location 📍 &rarr;
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {{-- TAB 3: SECTIONS & PARTICULARS MANAGER --}}
+            {{-- TAB 3: LOCATION & VENUE DETAILS --}}
+            @php
+                $venueSection = $invitation->sections->where('section_type', 'venue')->first();
+                $vContent = $venueSection?->content ?? [];
+                $firstEvent = $invitation->events->first();
+                $defVenueName = $vContent['venue_name'] ?? ($firstEvent?->venue_name ?? 'The Grand Palace & Resort');
+                $defVenueAddress = $vContent['venue_address'] ?? ($firstEvent?->venue_address ?? 'Palace Road, City Center, Rajasthan 313001');
+                $defCityDisplay = $vContent['city_display'] ?? 'Udaipur, Rajasthan';
+                $defMapsUrl = $vContent['google_maps_url'] ?? '';
+                $defMapEmbed = $vContent['map_embed_url'] ?? '';
+                $defAirport = $vContent['airport_distance'] ?? '25 km from Maharana Pratap Airport (UDR)';
+                $defTrain = $vContent['train_distance'] ?? '8 km from Udaipur City Railway Station';
+                $defLandmark = $vContent['landmark'] ?? 'Near Gate 2, Lake Pichola Waterfront';
+                $defNotes = $vContent['directions_notes'] ?? 'Valet parking available for all guests at the North Lawn entrance.';
+            @endphp
+            <div class="builder-tab-pane" id="tab-location">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                    <span style="font-size: 20px;">📍</span>
+                    <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin: 0;">Venue &amp; Location Details</h3>
+                </div>
+                <p style="font-size: 12px; color: #94A3B8; margin-bottom: 16px;">Configure your event venue name, full address, Google Maps links, and arrival notes for your guests.</p>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 4px;">Primary Venue Name *</label>
+                    <input type="text" id="loc-venue-name" value="{{ $defVenueName }}" placeholder="e.g. The Leela Palace, Udaipur" class="form-control" oninput="updateLocationPreview(this.value, document.getElementById('loc-venue-address').value, document.getElementById('loc-city-display').value, document.getElementById('loc-maps-url').value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Full Address &amp; Street</label>
+                    <textarea id="loc-venue-address" rows="2" placeholder="e.g. Lake Pichola, City Palace Complex, Udaipur, Rajasthan 313001" class="form-control" oninput="updateLocationPreview(document.getElementById('loc-venue-name').value, this.value, document.getElementById('loc-city-display').value, document.getElementById('loc-maps-url').value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px; line-height: 1.4;">{{ $defVenueAddress }}</textarea>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">City / State (Short Badge Display)</label>
+                    <input type="text" id="loc-city-display" value="{{ $defCityDisplay }}" placeholder="e.g. Udaipur, Rajasthan" class="form-control" oninput="updateLocationPreview(document.getElementById('loc-venue-name').value, document.getElementById('loc-venue-address').value, this.value, document.getElementById('loc-maps-url').value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Custom Google Maps URL (Optional)</label>
+                    <input type="text" id="loc-maps-url" value="{{ $defMapsUrl }}" placeholder="https://maps.app.goo.gl/..." class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Google Map Embed Iframe URL (Optional)</label>
+                    <input type="text" id="loc-map-embed" value="{{ $defMapEmbed }}" placeholder="https://www.google.com/maps/embed?pb=..." class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Airport Distance</label>
+                        <input type="text" id="loc-airport" value="{{ $defAirport }}" placeholder="25 km from Airport" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Railway Distance</label>
+                        <input type="text" id="loc-train" value="{{ $defTrain }}" placeholder="12 km from Station" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Landmark &amp; Proximity</label>
+                    <input type="text" id="loc-landmark" value="{{ $defLandmark }}" placeholder="Opposite City Palace, Waterfront" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Guest Parking &amp; Arrival Notes</label>
+                    <input type="text" id="loc-notes" value="{{ $defNotes }}" placeholder="Valet parking available at North Lawn..." class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                </div>
+
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('theme')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to Design
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-save-location" onclick="saveLocationDetails()" class="btn-secondary" style="padding: 10px 16px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                            💾 Save Location
+                        </button>
+                        <button type="button" id="btn-next-location" onclick="saveLocationAndNext()" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                            Save &amp; Continue: Sections 📑 &rarr;
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- TAB 4: SECTIONS & CARD CUSTOMIZATION --}}
             <div class="builder-tab-pane" id="tab-sections">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin: 0;">Sections &amp; Particulars</h3>
                     <span style="font-size: 11px; color: var(--gold-primary); font-weight: 600;">{{ $invitation->sections->count() }} Sections</span>
                 </div>
-                <p style="font-size: 12px; color: #94A3B8; margin-bottom: 16px;">Toggle visibility or expand any section to edit texts, sacred shlokas, names, and particulars.</p>
+                <p style="font-size: 12px; color: #94A3B8; margin-bottom: 16px;">Customize texts, sacred shlokas, names, and individual card colors for any section.</p>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     @foreach($invitation->sections as $sec)
                     @php
                         $c = $sec->content ?? [];
+                        $s = $sec->settings ?? [];
                     @endphp
                     <div class="glass-panel" style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; overflow: hidden; padding: 0;">
                         {{-- Section Row Header --}}
@@ -231,7 +450,7 @@
                                         {{ str_replace('_', ' ', $sec->section_type) }}
                                     </span>
                                     <span style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(212,175,55,0.15); color: #FDE68A; font-weight: 600;">
-                                        ✏️ Edit
+                                        ✏️ Customize
                                     </span>
                                 </div>
                                 <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">{{ Str::limit($sec->title ?: 'Default Section', 30) }}</div>
@@ -243,16 +462,18 @@
                             </label>
                         </div>
 
-                        {{-- Expandable Content Editor --}}
+                        {{-- Expandable Content & Styling Editor --}}
                         <div id="section-editor-{{ $sec->id }}" style="display: none; padding: 14px 16px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.35);">
+                            
+                            {{-- Header & Subtitle --}}
                             <div style="margin-bottom: 10px;">
                                 <label style="display: block; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Section Header / Title</label>
-                                <input type="text" id="sec-title-{{ $sec->id }}" value="{{ $sec->title }}" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                                <input type="text" id="sec-title-{{ $sec->id }}" value="{{ $sec->title }}" oninput="syncLiveSectionText({{ $sec->id }}, '{{ $sec->section_type }}', this.value, document.getElementById('sec-subtitle-{{ $sec->id }}').value)" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                             </div>
 
-                            <div style="margin-bottom: 10px;">
+                            <div style="margin-bottom: 12px;">
                                 <label style="display: block; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Subtitle / Message / Invocations</label>
-                                <textarea id="sec-subtitle-{{ $sec->id }}" rows="2" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px; line-height: 1.4;">{{ $sec->subtitle }}</textarea>
+                                <textarea id="sec-subtitle-{{ $sec->id }}" rows="2" oninput="syncLiveSectionText({{ $sec->id }}, '{{ $sec->section_type }}', document.getElementById('sec-title-{{ $sec->id }}').value, this.value)" class="form-control" style="width: 100%; padding: 8px 12px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px; line-height: 1.4;">{{ $sec->subtitle }}</textarea>
                             </div>
 
                             {{-- Specific Content Fields based on Section Type --}}
@@ -260,18 +481,32 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
                                 <div>
                                     <label style="display: block; font-size: 10px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 4px;">Groom's Name</label>
-                                    <input type="text" id="sec-groom-{{ $sec->id }}" value="{{ $c['groom_name'] ?? 'Rahul' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                                    <input type="text" id="sec-groom-{{ $sec->id }}" value="{{ $c['groom_name'] ?? 'Rahul' }}" oninput="syncLiveText('groom-name-display', this.value)" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                                 </div>
                                 <div>
                                     <label style="display: block; font-size: 10px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 4px;">Bride's Name</label>
-                                    <input type="text" id="sec-bride-{{ $sec->id }}" value="{{ $c['bride_name'] ?? 'Priya' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                                    <input type="text" id="sec-bride-{{ $sec->id }}" value="{{ $c['bride_name'] ?? 'Priya' }}" oninput="syncLiveText('bride-name-display', this.value)" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                                 </div>
                             </div>
                             <div style="margin-bottom: 10px;">
                                 <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">City / Venue Display</label>
-                                <input type="text" id="sec-city-{{ $sec->id }}" value="{{ $c['city_display'] ?? 'Mumbai, India' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                                <input type="text" id="sec-city-{{ $sec->id }}" value="{{ $c['city_display'] ?? 'Mumbai, India' }}" oninput="syncLiveText('hero-city-display', '📍 ' + this.value)" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                             </div>
+                            @if($sec->section_type === 'couple')
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Love Story Narrative</label>
+                                <textarea id="sec-story-{{ $sec->id }}" rows="2" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">{{ $c['story'] ?? '' }}</textarea>
+                            </div>
+                            @endif
                             @elseif($sec->section_type === 'venue')
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 4px;">Venue Name</label>
+                                <input type="text" id="sec-venue-name-{{ $sec->id }}" value="{{ $c['venue_name'] ?? '' }}" placeholder="The Leela Palace" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Venue Address</label>
+                                <input type="text" id="sec-venue-address-{{ $sec->id }}" value="{{ $c['venue_address'] ?? '' }}" placeholder="Lake Pichola, Udaipur" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
                             <div style="margin-bottom: 10px;">
                                 <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Venue Story / Description</label>
                                 <input type="text" id="sec-venue-desc-{{ $sec->id }}" value="{{ $c['description'] ?? '' }}" placeholder="An idyllic palace setting..." class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
@@ -286,15 +521,95 @@
                                     <input type="text" id="sec-train-{{ $sec->id }}" value="{{ $c['train_distance'] ?? '' }}" placeholder="12 km from Station" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                                 </div>
                             </div>
-                            @elseif($sec->section_type === 'dress_code')
                             <div style="margin-bottom: 10px;">
-                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Attire / Dress Guidelines</label>
-                                <input type="text" id="sec-dress-{{ $sec->id }}" value="{{ $c['attire'] ?? 'Festive Traditional & Pastel Elegance' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Google Maps Link</label>
+                                <input type="text" id="sec-maps-url-{{ $sec->id }}" value="{{ $c['google_maps_url'] ?? '' }}" placeholder="https://maps.google.com/?q=..." class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            @elseif($sec->section_type === 'map')
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 4px;">Venue Name Display</label>
+                                <input type="text" id="sec-map-venue-{{ $sec->id }}" value="{{ $c['venue_name'] ?? '' }}" placeholder="Taj Lake Palace, Udaipur" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Address Display</label>
+                                <input type="text" id="sec-map-address-{{ $sec->id }}" value="{{ $c['venue_address'] ?? '' }}" placeholder="Pichola, Udaipur, Rajasthan 313001" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Google Maps URL</label>
+                                <input type="text" id="sec-map-link-{{ $sec->id }}" value="{{ $c['google_maps_url'] ?? '' }}" placeholder="https://maps.google.com/?q=..." class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            @elseif($sec->section_type === 'dress_code')
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Mehendi &amp; Sangeet Attire</label>
+                                <input type="text" id="sec-dress-mehendi-{{ $sec->id }}" value="{{ $c['mehendi'] ?? 'Pastels & Bright Floral Lehengas' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Haldi Attire</label>
+                                <input type="text" id="sec-dress-haldi-{{ $sec->id }}" value="{{ $c['haldi'] ?? 'Sunshine Yellow & Mustard Kurtas' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Wedding / Reception Attire</label>
+                                <input type="text" id="sec-dress-wedding-{{ $sec->id }}" value="{{ $c['wedding'] ?? 'Traditional Royal Heritage & Sherwanis' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            @elseif($sec->section_type === 'family')
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Bride's Parents &amp; Hosts</label>
+                                <input type="text" id="sec-fam-bride-{{ $sec->id }}" value="{{ $c['parents_bride'] ?? 'Mr. Suresh & Mrs. Sunita Sharma' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Groom's Parents &amp; Hosts</label>
+                                <input type="text" id="sec-fam-groom-{{ $sec->id }}" value="{{ $c['parents_groom'] ?? 'Mr. Ramesh & Mrs. Kavita Verma' }}" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+                            @elseif($sec->section_type === 'video')
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">YouTube or MP4 Video URL</label>
+                                <input type="text" id="sec-video-url-{{ $sec->id }}" value="{{ $c['video_url'] ?? '' }}" placeholder="https://www.youtube.com/watch?v=..." class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                             </div>
                             @endif
 
+                            {{-- Card & Section Styling Overrides --}}
+                            <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(212,175,55,0.3); border-radius: 10px; padding: 12px; margin-top: 12px; margin-bottom: 12px;">
+                                <div style="font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 8px;">🎨 Card Color &amp; Background Customization</div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                    <div>
+                                        <label style="display: block; font-size: 10px; color: #94A3B8; margin-bottom: 4px;">Card Background Color</label>
+                                        <input type="color" id="sec-card-bg-{{ $sec->id }}" value="{{ $s['card_bg_color'] ?? '#0F172A' }}" oninput="updateSectionStyle({{ $sec->id }}, '{{ $sec->section_type }}', this.value, document.getElementById('sec-card-border-{{ $sec->id }}').value, document.getElementById('sec-card-text-{{ $sec->id }}').value, document.getElementById('sec-bg-image-{{ $sec->id }}').value)" style="width: 100%; height: 34px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 10px; color: #94A3B8; margin-bottom: 4px;">Card Border Color</label>
+                                        <input type="color" id="sec-card-border-{{ $sec->id }}" value="{{ $s['card_border_color'] ?? '#D4AF37' }}" oninput="updateSectionStyle({{ $sec->id }}, '{{ $sec->section_type }}', document.getElementById('sec-card-bg-{{ $sec->id }}').value, this.value, document.getElementById('sec-card-text-{{ $sec->id }}').value, document.getElementById('sec-bg-image-{{ $sec->id }}').value)" style="width: 100%; height: 34px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                                    <div>
+                                        <label style="display: block; font-size: 10px; color: #94A3B8; margin-bottom: 4px;">Card Text Color</label>
+                                        <input type="color" id="sec-card-text-{{ $sec->id }}" value="{{ $s['card_text_color'] ?? '#E2E8F0' }}" oninput="updateSectionStyle({{ $sec->id }}, '{{ $sec->section_type }}', document.getElementById('sec-card-bg-{{ $sec->id }}').value, document.getElementById('sec-card-border-{{ $sec->id }}').value, this.value, document.getElementById('sec-bg-image-{{ $sec->id }}').value)" style="width: 100%; height: 34px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: none; cursor: pointer;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 10px; color: #94A3B8; margin-bottom: 4px;">Card Style Preset</label>
+                                        <select id="sec-card-style-{{ $sec->id }}" class="form-control" style="width: 100%; padding: 6px 8px; border-radius: 6px; background: #0F172A; border: 1px solid rgba(255,255,255,0.2); color: #FFF; font-size: 11px;">
+                                            <option value="">Default Theme Card</option>
+                                            <option value="gold-foil-border" {{ ($s['card_style'] ?? '') === 'gold-foil-border' ? 'selected' : '' }}>✨ Gold Foil Shimmer</option>
+                                            <option value="glass-panel" {{ ($s['card_style'] ?? '') === 'glass-panel' ? 'selected' : '' }}>💎 Frosted Glass</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <label style="font-size: 10px; color: #94A3B8;">Section Card Background Image</label>
+                                        <button type="button" onclick="triggerSectionImageUpload({{ $sec->id }})" style="background: none; border: none; font-size: 10px; color: var(--gold-primary); cursor: pointer; text-decoration: underline;">
+                                            📁 Upload Card Photo
+                                        </button>
+                                    </div>
+                                    <input type="text" id="sec-bg-image-{{ $sec->id }}" value="{{ $s['bg_image'] ?? '' }}" placeholder="Paste image URL or upload above..." class="form-control" oninput="updateSectionStyle({{ $sec->id }}, '{{ $sec->section_type }}', document.getElementById('sec-card-bg-{{ $sec->id }}').value, document.getElementById('sec-card-border-{{ $sec->id }}').value, document.getElementById('sec-card-text-{{ $sec->id }}').value, this.value)" style="width: 100%; padding: 6px 10px; border-radius: 6px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 11px;">
+                                </div>
+                            </div>
+
                             <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-                                <button type="button" onclick="saveSectionParticulars({{ $sec->id }}, '{{ $sec->section_type }}')" class="btn-primary" style="padding: 6px 14px; font-size: 11px; font-weight: 700; border-radius: 6px;">
+                                <button type="button" id="btn-save-sec-{{ $sec->id }}" onclick="saveSectionParticulars({{ $sec->id }}, '{{ $sec->section_type }}')" class="btn-primary" style="padding: 7px 16px; font-size: 11px; font-weight: 700; border-radius: 6px;">
                                     <span>Save &amp; Update Live 💾</span>
                                 </button>
                             </div>
@@ -302,9 +617,19 @@
                     </div>
                     @endforeach
                 </div>
+
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('location')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to Location
+                    </button>
+                    <button type="button" onclick="goToTab('events')" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                        Continue: Events 📅 &rarr;
+                    </button>
+                </div>
             </div>
 
-            {{-- TAB 4: EVENTS & ITINERARY --}}
+            {{-- TAB 5: EVENTS & ITINERARY --}}
             <div class="builder-tab-pane" id="tab-events">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
                     <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin: 0;">Event Itinerary</h3>
@@ -313,7 +638,7 @@
 
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
                     @foreach($invitation->events as $ev)
-                    <div class="glass-panel" style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; overflow: hidden; padding: 0;">
+                    <div class="glass-panel" id="event-panel-{{ $ev->id }}" style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; overflow: hidden; padding: 0;">
                         {{-- Event Header Row --}}
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;">
                             <div style="flex: 1; cursor: pointer;" onclick="toggleEventEditor({{ $ev->id }})">
@@ -354,6 +679,11 @@
                                 <input type="text" id="ev-venue-{{ $ev->id }}" value="{{ $ev->venue_name }}" placeholder="Grand Ballroom, Palace Lawn" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
                             </div>
 
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Venue Address</label>
+                                <input type="text" id="ev-address-{{ $ev->id }}" value="{{ $ev->venue_address }}" placeholder="Street Address, City" class="form-control" style="width: 100%; padding: 7px 10px; border-radius: 8px; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 12px;">
+                            </div>
+
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
                                 <div>
                                     <label style="display: block; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;">Dress Code</label>
@@ -365,7 +695,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" onclick="saveEventDetails({{ $ev->id }})" class="btn-primary" style="width: 100%; padding: 8px; font-size: 11px; font-weight: 700; border-radius: 8px;">
+                            <button type="button" id="btn-save-event-{{ $ev->id }}" onclick="saveEventDetails({{ $ev->id }})" class="btn-primary" style="width: 100%; padding: 8px; font-size: 11px; font-weight: 700; border-radius: 8px;">
                                 <span>Save Event Particulars 💾</span>
                             </button>
                         </div>
@@ -389,9 +719,19 @@
                         <span>Add Event to Itinerary</span>
                     </button>
                 </div>
+
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('sections')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to Sections
+                    </button>
+                    <button type="button" onclick="goToTab('rsvp')" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                        Continue: RSVP 📝 &rarr;
+                    </button>
+                </div>
             </div>
 
-            {{-- TAB 5: RSVP BUILDER --}}
+            {{-- TAB 6: RSVP BUILDER --}}
             <div class="builder-tab-pane" id="tab-rsvp">
                 <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">RSVP Form Settings</h3>
 
@@ -412,12 +752,23 @@
                     </label>
                 </div>
 
-                <button type="button" onclick="saveRsvp()" class="btn-primary" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 10px;">
-                    <span>Save RSVP Settings 📝</span>
-                </button>
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('events')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to Events
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-save-rsvp" onclick="saveRsvp()" class="btn-secondary" style="padding: 10px 16px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                            💾 Save RSVP
+                        </button>
+                        <button type="button" id="btn-next-rsvp" onclick="saveRsvpAndNext()" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                            Save &amp; Continue: Media 🎵 &rarr;
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {{-- TAB 6: MEDIA & MUSIC --}}
+            {{-- TAB 7: MEDIA & MUSIC --}}
             <div class="builder-tab-pane" id="tab-media">
                 <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 16px;">Audio &amp; Gallery Media</h3>
 
@@ -426,12 +777,23 @@
                     <input type="text" id="opt-music-url" value="{{ $invitation->music_url }}" placeholder="https://example.com/song.mp3" class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.15); color: #FFF; font-size: 13px;">
                 </div>
 
-                <button type="button" onclick="saveMedia()" class="btn-primary" style="width: 100%; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 10px;">
-                    <span>Save Music &amp; Audio 🎵</span>
-                </button>
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('rsvp')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to RSVP
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-save-media" onclick="saveMedia()" class="btn-secondary" style="padding: 10px 16px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                            💾 Save Media
+                        </button>
+                        <button type="button" id="btn-next-media" onclick="saveMediaAndNext()" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                            Save &amp; Continue: AI Studio 🪄 &rarr;
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {{-- TAB: AI STUDIO --}}
+            {{-- TAB 8: AI STUDIO --}}
             <div class="builder-tab-pane" id="tab-ai">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
                     <span style="font-size: 20px;">🪄</span>
@@ -477,13 +839,23 @@
                 <div id="builder-ai-result-box" style="display: none; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.4); border-radius: 12px; padding: 14px;">
                     <div style="font-size: 11px; font-weight: 700; color: #D4AF37; text-transform: uppercase; margin-bottom: 6px;">Generated AI Copy</div>
                     <textarea id="builder-ai-result-text" rows="4" style="width: 100%; background: none; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; color: #FFF; font-size: 12px; line-height: 1.5; outline: none; margin-bottom: 8px;"></textarea>
-                    <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('builder-ai-result-text').value); alert('Copied to clipboard!');" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; width: 100%;">
+                    <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('builder-ai-result-text').value); showToast('Copied to clipboard! 📋', 'success');" class="btn-secondary" style="padding: 6px 12px; font-size: 11px; width: 100%;">
                         📋 Copy Text to Clipboard
+                    </button>
+                </div>
+
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('media')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to Media
+                    </button>
+                    <button type="button" onclick="goToTab('publish')" class="btn-primary" style="padding: 10px 20px; font-size: 13px; font-weight: 700; border-radius: 8px;">
+                        Continue: Pricing &amp; Publish 💎 &rarr;
                     </button>
                 </div>
             </div>
 
-            {{-- TAB 7: PRICING & PUBLISH --}}
+            {{-- TAB 9: PRICING & PUBLISH --}}
             <div class="builder-tab-pane" id="tab-publish">
                 <h3 style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 12px;">Premium Features &amp; Add-ons</h3>
 
@@ -526,9 +898,15 @@
                     </div>
                 </div>
 
-                <a href="{{ route('invitations.checkout.index', $invitation->id) }}" class="btn-primary" style="width: 100%; padding: 14px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; border-radius: 12px; display: block;">
-                    <span>Proceed to Publish 🚀</span>
-                </a>
+                {{-- Action Footer with Next Step --}}
+                <div class="tab-action-footer">
+                    <button type="button" onclick="goToTab('ai')" class="btn-secondary" style="padding: 10px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">
+                        &larr; Back to AI Studio
+                    </button>
+                    <a href="{{ route('invitations.checkout.index', $invitation->id) }}" class="btn-primary" style="padding: 10px 24px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+                        <span>Proceed to Publish 🚀</span>
+                    </a>
+                </div>
             </div>
 
         </aside>
@@ -543,215 +921,13 @@
     </div>
 
     {{-- Scripts --}}
-    <script src="{{ asset('js/invitations-builder.js') }}"></script>
+    <script src="{{ asset('js/invitations-builder.js') }}?v={{ time() }}"></script>
     <script>
-        function saveBasics() {
-            const data = {
-                title: document.getElementById('opt-title').value,
-                slug: document.getElementById('opt-slug').value,
-                event_date: document.getElementById('opt-event-date').value,
-                cover_image: document.getElementById('opt-cover-image').value
-            };
-
-            fetch('{{ route("invitations.builder.update", $invitation->id, false) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(d => {
-                if(d.success) alert('Basics saved!');
-            });
-        }
-
-        function saveDesign() {
-            const data = {
-                primary_color: document.getElementById('opt-primary-color').value,
-                secondary_color: document.getElementById('opt-secondary-color').value,
-                font_family_heading: document.getElementById('opt-heading-font').value,
-                animation_style: document.getElementById('opt-animation-style').value
-            };
-
-            fetch('{{ route("invitations.builder.update", $invitation->id, false) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(d => {
-                if(d.success) {
-                    alert('Design updated!');
-                    document.getElementById('builder-preview-iframe').contentWindow.location.reload();
-                }
-            });
-        }
-
-        function addNewEvent() {
-            const title = document.getElementById('new-event-title').value;
-            const date = document.getElementById('new-event-date').value;
-            const venue = document.getElementById('new-event-venue').value;
-
-            if(!title) return alert('Please enter an event title.');
-
-            fetch('{{ route("invitations.builder.event.add", $invitation->id, false) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ title: title, event_date: date, venue_name: venue })
-            })
-            .then(res => res.json())
-            .then(d => {
-                if(d.success) {
-                    alert('Event added!');
-                    window.location.reload();
-                }
-            });
-        }
-
-        function deleteEvent(eventId) {
-            if(!confirm('Remove this event?')) return;
-
-            fetch('/invitations/builder/{{ $invitation->id }}/event/' + eventId + '/delete', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(res => res.json())
-            .then(d => {
-                if(d.success) window.location.reload();
-            });
-        }
-
-        function saveRsvp() {
-            const data = {
-                deadline: document.getElementById('opt-rsvp-deadline').value,
-                max_party_size: document.getElementById('opt-rsvp-max-party').value,
-                allow_guest_plus_one: document.getElementById('opt-rsvp-plus-one').checked ? 1 : 0
-            };
-
-            fetch('{{ route("invitations.builder.rsvp.update", $invitation->id, false) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(d => {
-                if(d.success) alert('RSVP settings saved!');
-            });
-        }
-
-        function saveMedia() {
-            const data = {
-                music_url: document.getElementById('opt-music-url').value
-            };
-
-            fetch('{{ route("invitations.builder.update", $invitation->id, false) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(d => {
-                if(d.success) alert('Music settings saved!');
-            });
-        }
-
-        function toggleSectionEditor(sectionId) {
-            const editor = document.getElementById('section-editor-' + sectionId);
-            if (editor) {
-                editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function saveSectionParticulars(sectionId, sectionType) {
-            const title = document.getElementById('sec-title-' + sectionId)?.value;
-            const subtitle = document.getElementById('sec-subtitle-' + sectionId)?.value;
-            const content = {};
-
-            if (sectionType === 'hero' || sectionType === 'couple') {
-                content.groom_name = document.getElementById('sec-groom-' + sectionId)?.value;
-                content.bride_name = document.getElementById('sec-bride-' + sectionId)?.value;
-                content.city_display = document.getElementById('sec-city-' + sectionId)?.value;
-            } else if (sectionType === 'venue') {
-                content.description = document.getElementById('sec-venue-desc-' + sectionId)?.value;
-                content.airport_distance = document.getElementById('sec-airport-' + sectionId)?.value;
-                content.train_distance = document.getElementById('sec-train-' + sectionId)?.value;
-            } else if (sectionType === 'dress_code') {
-                content.attire = document.getElementById('sec-dress-' + sectionId)?.value;
-            }
-
-            fetch('/invitations/builder/{{ $invitation->id }}/section/' + sectionId + '/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: title,
-                    subtitle: subtitle,
-                    content: content
-                })
-            })
-            .then(res => res.json())
-            .then(d => {
-                if (d.success) {
-                    alert('Section particulars updated!');
-                    document.getElementById('builder-preview-iframe').contentWindow.location.reload();
-                }
-            })
-            .catch(err => alert('Failed to update section.'));
-        }
-
-        function toggleEventEditor(eventId) {
-            const editor = document.getElementById('event-editor-' + eventId);
-            if (editor) {
-                editor.style.display = editor.style.display === 'none' ? 'block' : 'none';
-            }
-        }
-
-        function saveEventDetails(eventId) {
-            const data = {
-                title: document.getElementById('ev-title-' + eventId)?.value,
-                event_date: document.getElementById('ev-date-' + eventId)?.value,
-                start_time: document.getElementById('ev-start-' + eventId)?.value,
-                venue_name: document.getElementById('ev-venue-' + eventId)?.value,
-                dress_code: document.getElementById('ev-dress-' + eventId)?.value,
-                icon: document.getElementById('ev-icon-' + eventId)?.value
-            };
-
-            fetch('/invitations/builder/{{ $invitation->id }}/event/' + eventId + '/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(d => {
-                if (d.success) {
-                    alert('Event particulars saved!');
-                    document.getElementById('builder-preview-iframe').contentWindow.location.reload();
-                }
-            })
-            .catch(err => alert('Failed to update event.'));
+        function setBgTexture(url) {
+            document.getElementById('opt-cover-image').value = url;
+            const secColor = document.getElementById('opt-secondary-color')?.value || '#0F172A';
+            const opacityVal = (document.getElementById('opt-bg-opacity')?.value || 45) / 100;
+            window.updatePageBg(secColor, url, opacityVal);
         }
     </script>
 </body>

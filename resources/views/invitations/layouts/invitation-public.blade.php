@@ -40,6 +40,7 @@
                 $isLight = $luminance > 0.60;
             }
         }
+        $bgOpacity = $invitation->bg_opacity ?? 0.45;
     @endphp
 
     <style>
@@ -56,6 +57,8 @@
             --invite-surface: #FFFFFF;
             --invite-card-bg: rgba(255, 255, 255, 0.92);
             --invite-card-border: rgba(217, 119, 6, 0.35);
+            --invite-card-text: #1E293B;
+            --invite-card-radius: 20px;
             --invite-heading: #431407;
             --invite-subheading: #7C2D12;
             --invite-text: #1E293B;
@@ -67,6 +70,7 @@
             --invite-input-text: #0F172A;
             --envelope-bg: radial-gradient(circle at center, #FFFBEB 0%, #FEF3C7 100%);
             --envelope-title: #431407;
+            --invite-bg-opacity: {{ $bgOpacity }};
         }
 
         body {
@@ -76,11 +80,14 @@
             overflow-x: hidden;
             margin: 0;
             padding: 0;
+            position: relative;
         }
 
         .invitation-canvas {
-            background: var(--invite-bg) !important;
+            background: transparent !important;
             box-shadow: 0 0 50px rgba(217, 119, 6, 0.15) !important;
+            position: relative;
+            z-index: 2;
         }
         @else
         :root {
@@ -95,6 +102,8 @@
             --invite-surface: #0B111E;
             --invite-card-bg: rgba(15, 23, 42, 0.85);
             --invite-card-border: rgba(212, 175, 55, 0.3);
+            --invite-card-text: #E2E8F0;
+            --invite-card-radius: 20px;
             --invite-heading: #FFFFFF;
             --invite-subheading: #FDE68A;
             --invite-text: #E2E8F0;
@@ -106,21 +115,51 @@
             --invite-input-text: #FFFFFF;
             --envelope-bg: radial-gradient(circle at center, #1E293B 0%, #030712 100%);
             --envelope-title: #FFFFFF;
+            --invite-bg-opacity: {{ $bgOpacity }};
         }
 
         body {
-            background-color: #030712;
+            background-color: var(--invite-bg, #0F172A);
             color: var(--invite-text);
             font-family: '{{ $invitation->font_family_body ?? "Outfit" }}', sans-serif;
             overflow-x: hidden;
             margin: 0;
             padding: 0;
+            position: relative;
+            min-height: 100vh;
         }
 
         .invitation-canvas {
-            background: var(--invite-bg) !important;
+            background: transparent !important;
+            position: relative;
+            z-index: 2;
         }
         @endif
+
+        /* Custom Background Image & Overlay */
+        .invitation-canvas-bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: var(--invite-bg-opacity, {{ $bgOpacity }}) !important;
+            transition: opacity 0.15s ease, background-image 0.3s ease;
+        }
+
+        .event-card, .glass-panel {
+            background: var(--invite-card-bg, rgba(15, 23, 42, 0.85)) !important;
+            border: 1px solid var(--invite-card-border, rgba(212, 175, 55, 0.3)) !important;
+            color: var(--invite-card-text, var(--invite-text, #E2E8F0));
+            border-radius: var(--invite-card-radius, 20px);
+        }
 
         {{ $invitation->custom_css ?? '' }}
     </style>
@@ -150,6 +189,22 @@
     </div>
     @endif
 
+    {{-- Background Texture / Image Layer --}}
+    @php
+        $rawCover = $invitation->cover_image ?? '';
+        $normalizedCover = '';
+        if (!empty($rawCover)) {
+            if (preg_match('/unsplash\.com\/photos\/(?:[\w-]+-)?([a-zA-Z0-9_-]+)/i', $rawCover, $m) && !str_contains($rawCover, 'images.unsplash.com')) {
+                $normalizedCover = 'https://unsplash.com/photos/' . $m[1] . '/download?w=1600';
+            } elseif (preg_match('/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i', $rawCover, $m)) {
+                $normalizedCover = 'https://drive.google.com/uc?export=view&id=' . $m[1];
+            } else {
+                $normalizedCover = $rawCover;
+            }
+        }
+    @endphp
+    <div id="invitation-bg-layer" class="invitation-canvas-bg-layer" style="{{ !empty($normalizedCover) ? 'background-image: url(\'' . $normalizedCover . '\');' : '' }}"></div>
+
     {{-- 2. Ambient Particles Canvas --}}
     <canvas id="particles-canvas" class="particles-canvas" data-style="{{ $invitation->animation_style ?? 'sparkles_float' }}"></canvas>
 
@@ -162,7 +217,7 @@
     @include('invitations.sections.music')
 
     {{-- Scripts --}}
-    <script src="{{ asset('js/invitations-public.js') }}"></script>
+    <script src="{{ asset('js/invitations-public.js') }}?v={{ time() }}"></script>
     @stack('scripts')
 </body>
 </html>

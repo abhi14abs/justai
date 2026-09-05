@@ -26,7 +26,6 @@ Route::get('/pricing', [PostryxController::class, 'pricing'])->name('pricing');
 
 // Dedicated Checkout Flow
 Route::get('/checkout', [PaymentController::class, 'checkoutPage'])->name('checkout');
-Route::get('/checkout/paypal/success', [PaymentController::class, 'capturePayPal'])->name('checkout.paypal.success');
 
 // Blog & Resource Hub
 Route::get('/blog', [PostryxController::class, 'blog'])->name('blog.index');
@@ -108,11 +107,11 @@ Route::prefix('api')->group(function () {
     Route::post('/newsletter', [ApiController::class, 'newsletter'])->name('api.newsletter');
     Route::post('/coupon/validate', [ApiController::class, 'validateCoupon'])->name('api.coupon');
 
-    // Real Payment Gateway APIs
+    // Real Payment Gateway APIs (Razorpay Unified Single Gateway)
     Route::post('/checkout/create-order', [PaymentController::class, 'createOrder'])->name('api.checkout.create');
-    Route::post('/checkout/paypal/capture', [PaymentController::class, 'capturePayPal'])->name('api.checkout.paypal.capture');
     Route::post('/checkout/razorpay/verify', [PaymentController::class, 'verifyRazorpay'])->name('api.checkout.razorpay.verify');
-    Route::post('/checkout/upi/submit', [PaymentController::class, 'submitUpiPayment'])->name('api.checkout.upi.submit');
+    Route::post('/checkout/payment/failed', [PaymentController::class, 'recordPaymentFailure'])->name('api.checkout.payment.failed');
+    Route::post('/checkout/webhook/razorpay', [PaymentController::class, 'handleWebhook'])->name('api.checkout.webhook.razorpay');
 });
 
 /*
@@ -140,6 +139,9 @@ Route::post('/i/{slug}/share/{channel}', [InvitationPublicController::class, 'tr
 Route::post('/i/{slug}/memories/upload', [InvitationPublicController::class, 'uploadMemory'])->name('invitations.public.memories.upload');
 Route::get('/i/{slug}/memories', [InvitationPublicController::class, 'getMemories'])->name('invitations.public.memories.list');
 
+// Razorpay Asynchronous Server-to-Server Webhook
+Route::post('/api/invitations/webhook/razorpay', [InvitationCheckoutController::class, 'handleWebhook'])->name('api.invitations.webhook.razorpay');
+
 // 3. Customer Builder & Member Dashboard Routes (Protected)
 Route::middleware(['auth'])->group(function () {
     // Builder
@@ -150,7 +152,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/invitations/builder/{id}/event/{eventId}/update', [InvitationBuilderController::class, 'updateEvent'])->name('invitations.builder.event.update');
     Route::post('/invitations/builder/{id}/event/{eventId}/delete', [InvitationBuilderController::class, 'deleteEvent'])->name('invitations.builder.event.delete');
     Route::post('/invitations/builder/{id}/section/{sectionId}/update', [InvitationBuilderController::class, 'updateSection'])->name('invitations.builder.section.update');
+    Route::post('/invitations/builder/{id}/location/update', [InvitationBuilderController::class, 'saveLocation'])->name('invitations.builder.location.update');
     Route::post('/invitations/builder/{id}/rsvp/update', [InvitationBuilderController::class, 'updateRsvp'])->name('invitations.builder.rsvp.update');
+    Route::post('/invitations/builder/{id}/upload-asset', [InvitationBuilderController::class, 'uploadAsset'])->name('invitations.builder.upload.asset');
+    Route::post('/invitations/builder/{id}/ingest-remote-url', [InvitationBuilderController::class, 'ingestRemoteUrl'])->name('invitations.builder.ingest.remote.url');
 
     // Checkout & Publishing
     Route::get('/invitations/checkout/{id}', [InvitationCheckoutController::class, 'checkout'])->name('invitations.checkout.index');

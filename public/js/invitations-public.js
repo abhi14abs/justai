@@ -355,6 +355,7 @@
 
         const data = event.data;
 
+        // Toggle Section Visibility
         if (data.type === 'TOGGLE_SECTION') {
             const sectionEl = document.getElementById('section-wrapper-' + data.sectionId) ||
                               document.querySelector(`[data-section-id="${data.sectionId}"]`) ||
@@ -378,19 +379,157 @@
                     }, 200);
                 }
             }
-        } else if (data.type === 'UPDATE_STYLE') {
-            if (data.variable && data.value) {
+        } 
+        // Update CSS Custom Properties
+        else if (data.type === 'UPDATE_STYLE') {
+            if (data.variable && data.value !== undefined) {
                 document.documentElement.style.setProperty(data.variable, data.value);
             }
-        } else if (data.type === 'UPDATE_TEXT') {
-            if (data.elementId && data.value !== undefined) {
-                const targetEl = document.getElementById(data.elementId) || document.querySelector(`.${data.elementId}`);
-                if (targetEl) {
-                    targetEl.innerText = data.value;
+        }
+        // Update Page Background & Texture
+        else if (data.type === 'UPDATE_PAGE_BG') {
+            if (data.color) {
+                document.documentElement.style.setProperty('--invite-bg', data.color);
+                document.documentElement.style.setProperty('--invite-secondary', data.color);
+                document.body.style.backgroundColor = data.color;
+            }
+            if (data.imageUrl !== undefined) {
+                let imgUrl = data.imageUrl ? data.imageUrl.trim() : '';
+                if (imgUrl) {
+                    const unsplashMatch = imgUrl.match(/unsplash\.com\/photos\/(?:[\w-]+-)?([a-zA-Z0-9_-]+)/i);
+                    if (unsplashMatch && unsplashMatch[1] && !imgUrl.includes('images.unsplash.com')) {
+                        imgUrl = `https://unsplash.com/photos/${unsplashMatch[1]}/download?force=true&w=1600`;
+                    } else if (imgUrl.includes('drive.google.com/')) {
+                        const dMatch = imgUrl.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([a-zA-Z0-9_-]+)/i);
+                        if (dMatch && dMatch[1]) imgUrl = `https://drive.google.com/uc?export=download&id=${dMatch[1]}`;
+                    }
+                }
+                const bgLayer = document.getElementById('invitation-bg-layer');
+                if (bgLayer) {
+                    bgLayer.style.backgroundImage = imgUrl ? `url('${imgUrl}')` : 'none';
+                }
+            }
+            if (data.opacity !== undefined) {
+                const op = parseFloat(data.opacity);
+                document.documentElement.style.setProperty('--invite-bg-opacity', op);
+                const bgLayer = document.getElementById('invitation-bg-layer');
+                if (bgLayer) {
+                    bgLayer.style.setProperty('opacity', op, 'important');
                 }
             }
         }
+        // Update Global Card Styling
+        else if (data.type === 'UPDATE_CARD_STYLE') {
+            if (data.cardBg) {
+                document.documentElement.style.setProperty('--invite-card-bg', data.cardBg);
+            }
+            if (data.cardBorder) {
+                document.documentElement.style.setProperty('--invite-card-border', data.cardBorder);
+            }
+            if (data.cardText) {
+                document.documentElement.style.setProperty('--invite-card-text', data.cardText);
+            }
+            if (data.cardRadius) {
+                document.documentElement.style.setProperty('--invite-card-radius', data.cardRadius + 'px');
+            }
+        }
+        // Update Specific Section / Card Custom Styling
+        else if (data.type === 'UPDATE_SECTION_STYLE') {
+            const secWrapper = document.getElementById('section-wrapper-' + data.sectionId) ||
+                              document.querySelector(`[data-section-id="${data.sectionId}"]`) ||
+                              document.querySelector(`[data-section-type="${data.sectionType}"]`);
+            if (secWrapper) {
+                const cards = secWrapper.querySelectorAll('.event-card, .glass-panel, .venue-card-box, .map-card-box, .intro-card-box');
+                cards.forEach(card => {
+                    if (data.cardBg) card.style.setProperty('background-color', data.cardBg, 'important');
+                    if (data.cardBorder) card.style.setProperty('border-color', data.cardBorder, 'important');
+                    if (data.cardText) card.style.setProperty('color', data.cardText, 'important');
+                    if (data.bgImage !== undefined) {
+                        card.style.backgroundImage = data.bgImage ? `url('${data.bgImage}')` : 'none';
+                        card.style.backgroundSize = 'cover';
+                    }
+                });
+            }
+        }
+        // Update Live Location Details
+        else if (data.type === 'UPDATE_LOCATION') {
+            if (data.venueName) {
+                document.querySelectorAll('.venue-name-display, .map-venue-name-display').forEach(el => el.innerText = data.venueName);
+            }
+            if (data.venueAddress) {
+                document.querySelectorAll('.venue-address-display, .map-venue-address-display').forEach(el => el.innerText = '📍 ' + data.venueAddress);
+            }
+            if (data.cityDisplay) {
+                document.querySelectorAll('.hero-city-display').forEach(el => el.innerText = '📍 ' + data.cityDisplay);
+            }
+            if (data.googleMapsUrl) {
+                document.querySelectorAll('.venue-maps-link, .map-btn-link').forEach(el => el.href = data.googleMapsUrl);
+            }
+        }
+        // Update Live Element Text
+        else if (data.type === 'UPDATE_TEXT') {
+            if (data.elementId && data.value !== undefined) {
+                const targetEls = document.querySelectorAll('#' + data.elementId + ', .' + data.elementId);
+                targetEls.forEach(el => el.innerText = data.value);
+            }
+        }
+        // Update Section Content
+        else if (data.type === 'UPDATE_SECTION_CONTENT') {
+            const secWrapper = document.getElementById('section-wrapper-' + data.sectionId) ||
+                              document.querySelector(`[data-section-id="${data.sectionId}"]`) ||
+                              document.querySelector(`[data-section-type="${data.sectionType}"]`);
+            if (secWrapper) {
+                if (data.title !== undefined) {
+                    const titleEl = secWrapper.querySelector('.sec-title-display');
+                    if (titleEl) titleEl.innerText = data.title;
+                }
+                if (data.subtitle !== undefined) {
+                    const subEl = secWrapper.querySelector('.sec-subtitle-display');
+                    if (subEl) subEl.innerText = data.subtitle;
+                }
+            }
+        }
+        // Smooth scroll to relevant preview section when builder tab is clicked
+        else if (data.type === 'SCROLL_TO_TAB_SECTION') {
+            const tabId = data.tabId;
+            let targetEl = null;
+            if (tabId === 'basics' || tabId === 'theme') {
+                targetEl = document.getElementById('invitation-hero') || document.querySelector('.hero-invitation-container') || document.body;
+            } else if (tabId === 'location') {
+                targetEl = document.querySelector('[data-section-type="venue"]') || document.querySelector('[data-section-type="map"]') || document.getElementById('section-venue');
+            } else if (tabId === 'sections') {
+                targetEl = document.querySelector('[data-section-type="couple"]') || document.querySelector('[data-section-type="family"]') || document.querySelector('.invitation-section-wrapper');
+            } else if (tabId === 'events') {
+                targetEl = document.querySelector('[data-section-type="events"]') || document.getElementById('section-events');
+            } else if (tabId === 'rsvp') {
+                targetEl = document.querySelector('[data-section-type="rsvp"]') || document.getElementById('section-rsvp');
+            } else if (tabId === 'media') {
+                targetEl = document.querySelector('[data-section-type="gallery"]') || document.querySelector('[data-section-type="video"]') || document.getElementById('section-gallery');
+            }
+            if (targetEl) {
+                if (targetEl === document.body) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+        // Soft Reload Preview with Scroll Preservation
+        else if (data.type === 'REFRESH_PREVIEW') {
+            const scrollY = window.scrollY;
+            sessionStorage.setItem('builder_preview_scroll', scrollY);
+            window.location.reload();
+        }
     });
+
+    // Restore scroll position after soft reload
+    const savedScroll = sessionStorage.getItem('builder_preview_scroll');
+    if (savedScroll !== null) {
+        sessionStorage.removeItem('builder_preview_scroll');
+        window.addEventListener('load', () => {
+            window.scrollTo(0, parseInt(savedScroll, 10));
+        });
+    }
 
     // Initialize on DOM Ready
     document.addEventListener('DOMContentLoaded', () => {

@@ -266,37 +266,156 @@
     justify-content: space-between;
 }
 
+/* Builder Step Header & Progress */
+.builder-step-header {
+    padding: 12px 18px;
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.builder-step-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+
+.builder-step-badge {
+    font-weight: 800;
+    color: var(--gold-primary, #D4AF37);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.builder-step-title {
+    color: #E2E8F0;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.builder-progress-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.builder-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #D4AF37 0%, #F59E0B 100%);
+    border-radius: 999px;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.builder-tabs-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(6, 9, 15, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .builder-tabs-nav {
     display: flex;
     overflow-x: auto;
-    background: rgba(6, 9, 15, 0.6);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 0 8px;
-    scrollbar-width: none;
+    scroll-behavior: smooth;
+    padding: 8px 10px;
+    gap: 6px;
+    flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.5) rgba(15, 23, 42, 0.6);
 }
 
-.builder-tabs-nav::-webkit-scrollbar { display: none; }
+.builder-tabs-nav::-webkit-scrollbar {
+    height: 4px;
+}
+.builder-tabs-nav::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+}
+.builder-tabs-nav::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.5);
+    border-radius: 4px;
+}
+.builder-tabs-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.8);
+}
+
+.builder-tab-scroll-btn {
+    width: 28px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.95);
+    color: #CBD5E1;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 10;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.builder-tab-scroll-btn:hover {
+    color: #FFF;
+    background: rgba(212, 175, 55, 0.25);
+}
 
 .builder-tab-btn {
-    padding: 12px 14px;
+    padding: 8px 12px;
     color: #94A3B8;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    border: none;
-    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
-    border-bottom: 2px solid transparent;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
+}
+
+.builder-tab-btn:hover {
+    color: #FFF;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .builder-tab-btn.active {
     color: #FFF;
-    border-bottom-color: #D4AF37;
-    background: rgba(212, 175, 55, 0.08);
+    border-color: var(--gold-primary, #D4AF37);
+    background: rgba(212, 175, 55, 0.18);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+    font-weight: 700;
+}
+
+.builder-tab-num {
+    font-size: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #CBD5E1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.builder-tab-btn.active .builder-tab-num {
+    background: var(--gold-primary, #D4AF37);
+    color: #0F172A;
 }
 
 .builder-tab-pane {
@@ -308,6 +427,58 @@
 
 .builder-tab-pane.active {
     display: block;
+}
+
+/* Bottom Step Action Buttons */
+.tab-action-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Luxury Texture Preset Tiles */
+.bg-preset-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.bg-preset-item {
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 10px 6px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    color: #FFFFFF !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+    position: relative;
+    overflow: hidden;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.bg-preset-item:hover {
+    border-color: var(--gold-primary, #D4AF37);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(212, 175, 55, 0.35);
+}
+
+.bg-preset-item.active {
+    border-color: var(--gold-primary, #D4AF37);
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
 }
 
 .builder-preview-stage {

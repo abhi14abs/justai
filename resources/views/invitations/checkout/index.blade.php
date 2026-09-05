@@ -3,9 +3,15 @@
 @section('title', 'Publish Invitation Checkout | CelebrateAI')
 
 @section('content')
-<div style="max-width: 900px; margin: 0 auto; padding: 40px 20px 80px;">
+<div style="max-width: 920px; margin: 0 auto; padding: 40px 20px 80px;">
 
-    <div style="text-align: center; margin-bottom: 36px;">
+    {{-- Top Header --}}
+    <div style="text-align: center; margin-bottom: 32px;">
+        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; color: var(--gold-primary); margin-bottom: 12px;">
+            <span>⚡ Secure Instant Publishing</span>
+            <span>•</span>
+            <span>Razorpay Gateway</span>
+        </div>
         <h1 style="font-size: 28px; font-weight: 800; color: #FFF; margin: 0 0 8px;">
             Publish &amp; Activate Digital Invitation
         </h1>
@@ -14,18 +20,52 @@
         </p>
     </div>
 
+    {{-- Currency / Origin Switcher Bar --}}
+    <div class="glass-panel" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 20px; border-radius: 16px; margin-bottom: 28px; border: 1px solid rgba(255,255,255,0.08);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 18px;">📍</span>
+            <div>
+                <div style="font-size: 13px; font-weight: 700; color: #FFF;">
+                    Origin &amp; Currency: 
+                    <span style="color: var(--gold-primary);">{{ $currency === 'INR' ? '🇮🇳 India (INR ₹)' : '🌐 International (USD $)' }}</span>
+                </div>
+                <div style="font-size: 11px; color: #94A3B8;">
+                    Auto-configured for your location. You can switch currency below anytime.
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(15,23,42,0.8); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <a href="{{ route('invitations.checkout.index', ['id' => $invitation->id, 'currency' => 'INR', 'coupon' => request('coupon')]) }}"
+               style="padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.2s; {{ $currency === 'INR' ? 'background: linear-gradient(135deg, #D4AF37, #B38F26); color: #000; box-shadow: 0 2px 8px rgba(212,175,55,0.3);' : 'color: #94A3B8;' }}">
+                <span>🇮🇳</span>
+                <span>INR (₹)</span>
+            </a>
+            <a href="{{ route('invitations.checkout.index', ['id' => $invitation->id, 'currency' => 'USD', 'coupon' => request('coupon')]) }}"
+               style="padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: all 0.2s; {{ $currency === 'USD' ? 'background: linear-gradient(135deg, #D4AF37, #B38F26); color: #000; box-shadow: 0 2px 8px rgba(212,175,55,0.3);' : 'color: #94A3B8;' }}">
+                <span>🌐</span>
+                <span>USD ($)</span>
+            </a>
+        </div>
+    </div>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 32px;">
         
         {{-- Order Breakdown Card --}}
         <div class="glass-panel" style="padding: 28px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.3);">
-            <h2 style="font-size: 18px; font-weight: 800; color: #FFF; margin: 0 0 20px;">
-                Order Summary
-            </h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 18px; font-weight: 800; color: #FFF; margin: 0;">
+                    Order Summary
+                </h2>
+                <span style="font-size: 12px; font-weight: 700; color: var(--gold-primary); background: rgba(212,175,55,0.1); padding: 4px 10px; border-radius: 8px;">
+                    {{ $currency }}
+                </span>
+            </div>
 
             {{-- Template Item --}}
             <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
                 <div>
-                    <div style="font-size: 14px; font-weight: 700; color: #FFF;">{{ $invitation->template->name ?? 'Base Invitation Template' }}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #FFF;">{{ $invitation->template->name ?? 'Digital Invitation Template' }}</div>
                     <div style="font-size: 12px; color: #94A3B8;">Full animated mobile &amp; desktop design</div>
                 </div>
                 <div style="font-size: 15px; font-weight: 800; color: #FFF;">
@@ -34,17 +74,19 @@
             </div>
 
             {{-- Features Addons --}}
-            @foreach($pricing['features'] as $f)
-            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span>{{ $f['icon'] ?? '✨' }}</span>
-                    <span style="font-size: 13px; color: #E2E8F0;">{{ $f['name'] }}</span>
+            @if(!empty($pricing['features']))
+                @foreach($pricing['features'] as $f)
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>{{ $f['icon'] ?? '✨' }}</span>
+                        <span style="font-size: 13px; color: #E2E8F0;">{{ $f['name'] }}</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 700; color: var(--gold-primary);">
+                        {{ $f['formatted_price'] }}
+                    </div>
                 </div>
-                <div style="font-size: 13px; font-weight: 700; color: var(--gold-primary);">
-                    {{ $f['formatted_price'] }}
-                </div>
-            </div>
-            @endforeach
+                @endforeach
+            @endif
 
             {{-- Coupon Input --}}
             <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; margin-top: 16px; margin-bottom: 16px;">
@@ -65,62 +107,71 @@
 
             {{-- Final Payable --}}
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid rgba(212,175,55,0.4); padding-top: 16px; margin-top: 16px;">
-                <span style="font-size: 16px; font-weight: 800; color: #FFF;">Total Amount</span>
-                <span style="font-size: 24px; font-weight: 900; color: var(--gold-primary);">{{ $pricing['formatted_final'] }}</span>
+                <div>
+                    <span style="font-size: 16px; font-weight: 800; color: #FFF; display: block;">Total Payable</span>
+                    <span style="font-size: 11px; color: #94A3B8;">All taxes included</span>
+                </div>
+                <span style="font-size: 26px; font-weight: 900; color: var(--gold-primary);">{{ $pricing['formatted_final'] }}</span>
             </div>
         </div>
 
-        {{-- Payment Method Selection --}}
-        <div class="glass-panel" style="padding: 28px; border-radius: 20px;">
-            <h2 style="font-size: 18px; font-weight: 800; color: #FFF; margin: 0 0 20px;">
-                Select Payment Method
-            </h2>
+        {{-- Single Gateway Checkout Card --}}
+        <div class="glass-panel" style="padding: 28px; border-radius: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #FFF; margin: 0 0 16px;">
+                    Payment Method
+                </h2>
 
-            @if($pricing['is_free'])
-                <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 16px; border-radius: 12px; margin-bottom: 24px; text-align: center;">
-                    <div style="font-size: 15px; font-weight: 800; color: #34D399; margin-bottom: 4px;">🎉 100% Free Invitation!</div>
-                    <div style="font-size: 12px; color: #A7F3D0;">No payment required. Click below to publish instantly.</div>
+                @if($pricing['is_free'])
+                    <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 18px; border-radius: 14px; margin-bottom: 24px; text-align: center;">
+                        <div style="font-size: 16px; font-weight: 800; color: #34D399; margin-bottom: 4px;">🎉 100% Free Invitation!</div>
+                        <div style="font-size: 12px; color: #A7F3D0;">No charge applied. Click below to publish immediately.</div>
+                    </div>
+                @else
+                    {{-- Razorpay Exclusive Provider Card --}}
+                    <div style="background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(212, 175, 55, 0.5); padding: 20px; border-radius: 16px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 38px; height: 38px; border-radius: 10px; background: #0C2340; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #3399CC; font-size: 16px; border: 1px solid rgba(51, 153, 204, 0.4);">
+                                    R
+                                </div>
+                                <div>
+                                    <div style="font-weight: 800; color: #FFF; font-size: 15px;">Razorpay Secure Gateway</div>
+                                    <div style="font-size: 11px; color: #94A3B8;">Official Payment Partner</div>
+                                </div>
+                            </div>
+                            <span style="background: rgba(16, 185, 129, 0.15); color: #34D399; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                                Active
+                            </span>
+                        </div>
+
+                        <div style="font-size: 12px; color: #CBD5E1; line-height: 1.6; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+                            @if($currency === 'INR')
+                                <strong>Accepted in India (INR):</strong> UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards (RuPay, Visa, Mastercard), NetBanking, &amp; Wallets.
+                            @else
+                                <strong>Accepted Internationally (USD):</strong> International Visa, MasterCard, American Express, &amp; Global Debit/Credit Cards.
+                            @endif
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+            <div>
+                @if($pricing['is_free'])
+                    <button type="button" id="main-pay-btn" onclick="initiatePayment('free_publish')" class="btn-primary" style="width: 100%; padding: 15px; font-size: 16px; font-weight: 800; border-radius: 14px;">
+                        <span>Publish Invitation Now ✨</span>
+                    </button>
+                @else
+                    <button type="button" id="main-pay-btn" onclick="initiatePayment('razorpay')" class="btn-primary" style="width: 100%; padding: 15px; font-size: 16px; font-weight: 800; border-radius: 14px; box-shadow: 0 4px 20px rgba(212,175,55,0.35);">
+                        <span>Pay {{ $pricing['formatted_final'] }} with Razorpay 🚀</span>
+                    </button>
+                @endif
+
+                <div style="margin-top: 18px; text-align: center; font-size: 11px; color: #64748B; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>🔒 256-bit SSL Encrypted Checkout</span>
+                    <span>•</span>
+                    <span>Instant Live Activation</span>
                 </div>
-
-                <button type="button" onclick="initiatePayment('free_publish')" class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px;">
-                    <span>Publish Invitation Now ✨</span>
-                </button>
-            @else
-                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-                    @if($currency === 'INR')
-                    <label style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(212,175,55,0.4); cursor: pointer;">
-                        <input type="radio" name="payment_gateway" value="razorpay" checked style="accent-color: var(--gold-primary);">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 700; color: #FFF; font-size: 14px;">Razorpay (UPI, GPay, Cards, NetBanking)</div>
-                            <div style="font-size: 11px; color: #94A3B8;">Instant automated activation</div>
-                        </div>
-                    </label>
-
-                    <label style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
-                        <input type="radio" name="payment_gateway" value="upi_qr" style="accent-color: var(--gold-primary);">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 700; color: #FFF; font-size: 14px;">Direct UPI QR Scan</div>
-                            <div style="font-size: 11px; color: #94A3B8;">Pay via PhonePe / Paytm / BHIM</div>
-                        </div>
-                    </label>
-                    @endif
-
-                    <label style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 14px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
-                        <input type="radio" name="payment_gateway" value="paypal" {{ $currency === 'USD' ? 'checked' : '' }} style="accent-color: var(--gold-primary);">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 700; color: #FFF; font-size: 14px;">PayPal &amp; International Cards</div>
-                            <div style="font-size: 11px; color: #94A3B8;">USD &amp; Global Currencies</div>
-                        </div>
-                    </label>
-                </div>
-
-                <button type="button" onclick="submitSelectedPayment()" class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px;">
-                    <span>Pay {{ $pricing['formatted_final'] }} &amp; Publish 🚀</span>
-                </button>
-            @endif
-
-            <div style="margin-top: 20px; text-align: center; font-size: 11px; color: #64748B;">
-                🔒 256-bit Encrypted Secure Checkout
             </div>
         </div>
 
@@ -129,8 +180,8 @@
 </div>
 
 {{-- Payment Success Modal --}}
-<div id="payment-success-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 999999; padding: 20px;">
-    <div class="glass-panel" style="max-width: 480px; width: 100%; padding: 32px; border-radius: 24px; text-align: center; background: #0B111E; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 25px 60px rgba(0,0,0,0.8);">
+<div id="payment-success-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 999999; padding: 20px;">
+    <div class="glass-panel" style="max-width: 480px; width: 100%; padding: 32px; border-radius: 24px; text-align: center; background: #0B111E; border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 25px 60px rgba(0,0,0,0.85);">
         <div style="font-size: 54px; margin-bottom: 16px;">🎉</div>
         <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #10B981; margin-bottom: 6px;">Payment Successful</div>
         <h2 style="font-size: 22px; font-weight: 800; color: #FFF; margin: 0 0 12px;">Your Invitation is Now Live!</h2>
@@ -150,7 +201,7 @@
         </div>
 
         <div style="display: flex; gap: 10px; flex-direction: column;">
-            <a id="success-view-btn" href="#" class="btn-primary" style="padding: 12px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 12px; text-align: center;">
+            <a id="success-view-btn" href="#" class="btn-primary" style="padding: 13px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 12px; text-align: center;">
                 <span>View Live Invitation 🚀</span>
             </a>
             <a href="{{ route('invitations.dashboard.index') }}" class="btn-secondary" style="padding: 10px; font-size: 13px; text-decoration: none; border-radius: 10px; text-align: center;">
@@ -161,8 +212,8 @@
 </div>
 
 {{-- Payment Failure / Cancellation Modal --}}
-<div id="payment-failure-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 999999; padding: 20px;">
-    <div class="glass-panel" style="max-width: 480px; width: 100%; padding: 32px; border-radius: 24px; text-align: center; background: #0B111E; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 25px 60px rgba(0,0,0,0.8);">
+<div id="payment-failure-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 999999; padding: 20px;">
+    <div class="glass-panel" style="max-width: 480px; width: 100%; padding: 32px; border-radius: 24px; text-align: center; background: #0B111E; border: 1px solid rgba(239, 68, 68, 0.4); box-shadow: 0 25px 60px rgba(0,0,0,0.85);">
         <div style="font-size: 50px; margin-bottom: 16px;">⚠️</div>
         <div style="font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #F87171; margin-bottom: 6px;" id="failure-modal-tag">Payment Incomplete</div>
         <h2 style="font-size: 20px; font-weight: 800; color: #FFF; margin: 0 0 12px;" id="failure-modal-title">Payment Could Not Be Completed</h2>
@@ -175,7 +226,7 @@
         </div>
 
         <div style="display: flex; gap: 10px;">
-            <button type="button" onclick="closeFailureModal(); submitSelectedPayment();" class="btn-primary" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 12px;">
+            <button type="button" onclick="closeFailureModal(); initiatePayment('razorpay');" class="btn-primary" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 12px;">
                 <span>Retry Payment ⚡</span>
             </button>
             <button type="button" onclick="closeFailureModal()" class="btn-secondary" style="padding: 12px 18px; font-size: 13px; border-radius: 12px;">
@@ -185,15 +236,29 @@
     </div>
 </div>
 
-{{-- Razorpay Checkout Script --}}
+{{-- Razorpay Standard Checkout Script --}}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     let currentOrderNumber = null;
 
-    function submitSelectedPayment() {
-        const selected = document.querySelector('input[name="payment_gateway"]:checked')?.value || 'razorpay';
-        initiatePayment(selected);
-    }
+    // Client-side Origin Check (if currency not explicitly set in URL)
+    (function checkBrowserOrigin() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.has('currency')) {
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+                const isIndia = tz.includes('Calcutta') || tz.includes('Kolkata') || tz.includes('India');
+                const currentCurrency = '{{ $currency }}';
+                if (!isIndia && currentCurrency === 'INR') {
+                    // Switch to USD for international browser timezone
+                    urlParams.set('currency', 'USD');
+                    window.location.search = urlParams.toString();
+                }
+            } catch (e) {
+                // Ignore if timezone cannot be inspected
+            }
+        }
+    })();
 
     function showSuccessModal(orderNumber, txRef, redirectUrl) {
         document.getElementById('success-order-num').innerText = orderNumber || '--';
@@ -234,12 +299,14 @@
         }).catch(e => console.warn('Failure logging error:', e));
     }
 
-    function initiatePayment(gateway) {
+    function initiatePayment(gateway = 'razorpay') {
         const payBtn = document.getElementById('main-pay-btn');
         if (payBtn) {
             payBtn.disabled = true;
-            payBtn.innerHTML = '<span>⏳ Preparing Secure Checkout...</span>';
+            payBtn.innerHTML = '<span>⏳ Preparing Razorpay Checkout...</span>';
         }
+
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
 
         fetch('{{ route("invitations.checkout.order.create", $invitation->id, false) }}', {
             method: 'POST',
@@ -251,14 +318,15 @@
             body: JSON.stringify({
                 gateway: gateway,
                 currency: '{{ $currency }}',
-                coupon: '{{ request("coupon") }}'
+                coupon: '{{ request("coupon") }}',
+                timezone: tz
             })
         })
         .then(res => res.json())
         .then(data => {
             if (payBtn) {
                 payBtn.disabled = false;
-                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} &amp; Publish 🚀</span>';
+                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} with Razorpay 🚀</span>';
             }
 
             if (!data.success) {
@@ -326,23 +394,19 @@
                         );
                         showFailureModal(
                             'Payment Declined',
-                            err.description || 'Your payment was declined by the bank or UPI app.',
+                            err.description || 'Your payment was declined by the bank or card issuer.',
                             (err.reason || err.code || 'Bank declined / invalid credentials')
                         );
                     }
                 });
 
                 rzp.open();
-            } else if (data.gateway === 'paypal' && data.approve_url) {
-                window.location.href = data.approve_url;
-            } else if (data.gateway === 'upi_qr') {
-                alert('Please pay ₹' + data.amount + ' to UPI: postryx@upi with order note ' + data.order_number);
             }
         })
         .catch(err => {
             if (payBtn) {
                 payBtn.disabled = false;
-                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} &amp; Publish 🚀</span>';
+                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} with Razorpay 🚀</span>';
             }
             showFailureModal('Network / Server Error', 'Failed to connect to the payment server. Please check your internet connection.', err.message);
         });
@@ -352,7 +416,7 @@
         const payBtn = document.getElementById('main-pay-btn');
         if (payBtn) {
             payBtn.disabled = true;
-            payBtn.innerHTML = '<span>⏳ Verifying Transaction...</span>';
+            payBtn.innerHTML = '<span>⏳ Verifying Transaction with Razorpay...</span>';
         }
 
         fetch('{{ route("invitations.checkout.payment.verify", $invitation->id, false) }}', {
@@ -374,7 +438,7 @@
         .then(d => {
             if (payBtn) {
                 payBtn.disabled = false;
-                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} &amp; Publish 🚀</span>';
+                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} with Razorpay 🚀</span>';
             }
             if (d.success) {
                 closeFailureModal();
@@ -386,7 +450,7 @@
         .catch(err => {
             if (payBtn) {
                 payBtn.disabled = false;
-                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} &amp; Publish 🚀</span>';
+                payBtn.innerHTML = '<span>Pay {{ $pricing["formatted_final"] }} with Razorpay 🚀</span>';
             }
             showFailureModal('Verification Error', 'Unable to complete verification on server. Please contact support.', err.message);
         });

@@ -1,13 +1,25 @@
 {{-- Guestbook, Wishes & Photo Memories Pool Section --}}
-<section class="invitation-section" id="memories-section">
+@php
+    $content = $section->content ?? [];
+    $settings = $section->settings ?? [];
+
+    // Section Custom Card Styling Overrides
+    $cardStyleAttr = '';
+    if (!empty($settings['card_bg_color'])) $cardStyleAttr .= 'background-color: ' . $settings['card_bg_color'] . ' !important; ';
+    if (!empty($settings['card_border_color'])) $cardStyleAttr .= 'border-color: ' . $settings['card_border_color'] . ' !important; ';
+    if (!empty($settings['card_text_color'])) $cardStyleAttr .= 'color: ' . $settings['card_text_color'] . ' !important; ';
+    if (!empty($settings['bg_image'])) $cardStyleAttr .= 'background-image: url(' . $settings['bg_image'] . '); background-size: cover; background-position: center; ';
+@endphp
+
+<section class="invitation-section" id="memories-section" data-section-type="guestbook">
     <div style="text-align: center; margin-bottom: 24px;">
         <div style="font-size: 11px; letter-spacing: 0.18em; color: var(--gold-primary); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">
-            ✦ {{ $section->title ?? 'Celebration Memories & Wishes' }} ✦
+            ✦ <span class="sec-title-display">{{ $section->title ?? 'Celebration Memories & Wishes' }}</span> ✦
         </div>
-        <h2 style="font-family: var(--font-serif-lux); font-size: 24px; color: #FFF; margin: 0 0 6px; font-weight: 700;">
-            {{ $section->subtitle ?? 'Share Your Blessings & Snapshots' }}
+        <h2 style="font-family: var(--font-serif-lux); font-size: 24px; color: var(--invite-heading, #FFF); margin: 0 0 6px; font-weight: 700;">
+            <span class="sec-subtitle-display">{{ $section->subtitle ?? 'Share Your Blessings & Snapshots' }}</span>
         </h2>
-        <p style="color: #94A3B8; font-size: 13px; margin: 0;">
+        <p style="color: var(--invite-text-muted, #94A3B8); font-size: 13px; margin: 0;">
             Captured a special moment? Upload your photo to our live celebration wall!
         </p>
     </div>
@@ -20,7 +32,7 @@
     @if($guestMemories->count() > 0)
     <div id="memories-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px;">
         @foreach($guestMemories as $memory)
-        <div class="event-card" style="padding: 8px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="event-card {{ $settings['card_style'] ?? '' }}" style="padding: 8px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; {{ $cardStyleAttr }}">
             <div style="position: relative; padding-top: 100%; border-radius: 8px; overflow: hidden; background: #000;">
                 <img src="{{ $memory->file_path }}" alt="{{ $memory->name }}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
             </div>

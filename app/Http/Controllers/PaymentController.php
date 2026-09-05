@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Affiliate;
 use App\Models\Order;
 use App\Models\User;
-use App\Services\Payment\PayPalService;
 use App\Services\Payment\RazorpayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,13 +16,60 @@ use Illuminate\Support\Str;
 
 class PaymentController extends Controller
 {
-    protected PayPalService $paypal;
     protected RazorpayService $razorpay;
 
-    public function __construct(PayPalService $paypal, RazorpayService $razorpay)
+    public function __construct(RazorpayService $razorpay)
     {
-        $this->paypal = $paypal;
         $this->razorpay = $razorpay;
+    }
+
+    /**
+     * Detect origin currency based on headers, IP, and query parameters.
+     */
+    public function detectOriginCurrency(Request $request): string
+    {
+        // 1. Explicit query or request override
+        if ($request->has('currency') && in_array(strtoupper($request->input('currency')), ['INR', 'USD'])) {
+            return strtoupper($request->input('currency'));
+        }
+
+        // 2. Cloudflare Country header
+        $cfCountry = strtoupper($request->header('CF-IPCountry', ''));
+        if (!empty($cfCountry)) {
+            return $cfCountry === 'IN' ? 'INR' : 'USD';
+        }
+
+        // 3. Other common CDN / Proxy Country headers
+        $geoHeaders = [
+            'X-Country-Code',
+            'CloudFront-Viewer-Country',
+            'X-GeoIP-Country-Code',
+            'X-AppEngine-Country',
+        ];
+        foreach ($geoHeaders as $hdr) {
+            $val = strtoupper($request->header($hdr, ''));
+            if (!empty($val)) {
+                return $val === 'IN' ? 'INR' : 'USD';
+            }
+        }
+
+        // 4. Client Timezone header if passed
+        $clientTz = $request->header('X-Client-Timezone', $request->input('timezone', ''));
+        if (!empty($clientTz)) {
+            if (stripos($clientTz, 'Calcutta') !== false || stripos($clientTz, 'Kolkata') !== false || stripos($clientTz, 'India') !== false || stripos($clientTz, 'IST') !== false) {
+                return 'INR';
+            }
+            return 'USD';
+        }
+
+        // 5. Check Accept-Language for Indian locales as a hint
+        $acceptLang = $request->header('Accept-Language', '');
+        if (preg_match('/-(IN)\b/i', $acceptLang)) {
+            return 'INR';
+        }
+
+        // Default baseline: INR
+        return 'INR';
     }
 
     /**
@@ -32,7 +78,7 @@ class PaymentController extends Controller
     public function checkoutPage(Request $request)
     {
         $plan = $request->query('plan', 'pro');
-        $currency = $request->query('currency', 'INR');
+        $currency = $this->detectOriginCurrency($request);
         $billing = $request->query('billing', 'monthly');
 
         $pricingTable = [
@@ -55,10 +101,19 @@ class PaymentController extends Controller
 
         // Default 50% Launch Discount
         $discountAmount = round($basePrice * 0.5, 2);
-        $finalPrice = $basePrice - $discountAmount;
+        $finalPrice = round($basePrice - $discountAmount, 2);
 
         // Check if referral cookie exists
         $refCode = Cookie::get('postryx_ref_code');
+
+        Log::info('[SAAS_CHECKOUT_PAGE_LOADED]', [
+            'plan' => $plan,
+            'currency' => $currency,
+            'billing' => $billing,
+            'basePrice' => $basePrice,
+            'finalPrice' => $finalPrice,
+            'ip' => $request->ip(),
+        ]);
 
         return view('checkout', [
             'plan' => $plan,
@@ -69,30 +124,30 @@ class PaymentController extends Controller
             'discountAmount' => $discountAmount,
             'finalPrice' => $finalPrice,
             'refCode' => $refCode,
-            'paypalClientId' => config('services.paypal.client_id'),
             'razorpayKeyId' => config('services.razorpay.key_id')
         ]);
     }
 
     /**
-     * Create Pending Order & Initialize Gateway.
+     * Create Pending Order & Initialize Razorpay Gateway.
      */
     public function createOrder(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'plan' => 'required|string|in:starter,pro,agency,lifetime',
-            'currency' => 'required|string|in:INR,USD',
+            'currency' => 'nullable|string|in:INR,USD',
             'billing' => 'required|string|in:monthly,annual,lifetime',
-            'gateway' => 'required|string|in:paypal,razorpay,stripe,upi_qr',
+            'gateway' => 'nullable|string|in:razorpay',
             'email' => 'required|email|max:255',
             'name' => 'nullable|string|max:255',
-            'coupon' => 'nullable|string|max:50'
+            'coupon' => 'nullable|string|max:50',
+            'timezone' => 'nullable|string',
         ]);
 
         $plan = $validated['plan'];
-        $currency = $validated['currency'];
+        $currency = $validated['currency'] ?? $this->detectOriginCurrency($request);
         $billing = $validated['billing'];
-        $gateway = $validated['gateway'];
+        $gateway = 'razorpay';
         $email = strtolower(trim($validated['email']));
         $name = trim($validated['name'] ?? explode('@', $email)[0]);
 
@@ -126,7 +181,7 @@ class PaymentController extends Controller
             $discountAmount = round($baseAmount * 0.3, 2);
         }
 
-        $finalAmount = max($baseAmount - $discountAmount, 1.00);
+        $finalAmount = max(round($baseAmount - $discountAmount, 2), 1.00);
 
         // Find or create customer account
         $user = Auth::user();
@@ -176,39 +231,33 @@ class PaymentController extends Controller
             'currency' => $currency,
             'discount_amount' => $discountAmount,
             'coupon_code' => $couponCode,
-            'payment_gateway' => $gateway,
+            'payment_gateway' => 'razorpay',
             'status' => 'pending',
             'affiliate_commission_amount' => $commissionAmount,
             'is_commission_credited' => false,
             'customer_email' => $email,
-            'customer_name' => $name
+            'customer_name' => $name,
+            'metadata' => [
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'base_amount' => $baseAmount,
+                'discount_amount' => $discountAmount,
+            ]
         ]);
 
-        // Gateway Specific Initialization
-        if ($gateway === 'paypal') {
-            $paypalResult = $this->paypal->createOrder($finalAmount, $currency, $orderNumber, ucfirst($plan));
-            if ($paypalResult['success']) {
-                $order->gateway_order_id = $paypalResult['paypal_order_id'];
-                $order->save();
-
-                return response()->json([
-                    'success' => true,
-                    'gateway' => 'paypal',
-                    'order_number' => $orderNumber,
-                    'paypal_order_id' => $paypalResult['paypal_order_id'],
-                    'approve_url' => $paypalResult['approve_url'],
-                    'amount' => $finalAmount,
-                    'currency' => $currency
-                ]);
-            }
-
-            return response()->json(['success' => false, 'error' => $paypalResult['error'] ?? 'PayPal order creation failed.'], 500);
-        }
-
-        if ($gateway === 'razorpay') {
+        // Create Razorpay Order
+        try {
             $razorpayResult = $this->razorpay->createOrder($finalAmount, $currency, $orderNumber);
             $order->gateway_order_id = $razorpayResult['razorpay_order_id'];
             $order->save();
+
+            Log::info('[SAAS_RAZORPAY_ORDER_CREATED]', [
+                'order_number' => $orderNumber,
+                'razorpay_order_id' => $razorpayResult['razorpay_order_id'],
+                'amount_paise' => $razorpayResult['amount'],
+                'currency' => $currency,
+                'user_email' => $email,
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -221,61 +270,24 @@ class PaymentController extends Controller
                 'customer_email' => $email,
                 'customer_name' => $name
             ]);
-        }
-
-        if ($gateway === 'upi_qr') {
-            $upiString = "upi://pay?pa=postryx@upi&pn=PostryxAI&am={$finalAmount}&cu=INR&tn={$orderNumber}";
-            return response()->json([
-                'success' => true,
-                'gateway' => 'upi_qr',
+        } catch (\Exception $e) {
+            Log::error('[SAAS_RAZORPAY_ORDER_FAILED]', [
                 'order_number' => $orderNumber,
-                'amount' => $finalAmount,
-                'currency' => 'INR',
-                'upi_string' => $upiString
+                'error' => $e->getMessage(),
             ]);
-        }
 
-        return response()->json(['success' => true, 'order_number' => $orderNumber]);
-    }
-
-    /**
-     * PayPal Payment Capture & Verification Callback.
-     */
-    public function capturePayPal(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'paypal_order_id' => 'required|string',
-            'order_number' => 'required|string'
-        ]);
-
-        $order = Order::where('order_number', $validated['order_number'])->first();
-        if (!$order) {
-            return response()->json(['success' => false, 'error' => 'Order not found.'], 404);
-        }
-
-        if ($order->status === 'completed') {
-            return response()->json(['success' => true, 'message' => 'Order already completed.']);
-        }
-
-        // Capture from PayPal API
-        $captureResult = $this->paypal->captureOrder($validated['paypal_order_id']);
-
-        if ($captureResult['success']) {
-            $order->gateway_payment_id = $captureResult['transaction_id'] ?? $validated['paypal_order_id'];
-            $this->completeOrder($order);
+            $order->status = 'failed';
+            $order->save();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Payment captured successfully!',
-                'redirect_url' => url('/dashboard?payment_success=true&order=' . $order->order_number)
-            ]);
+                'success' => false,
+                'error' => 'Unable to initialize Razorpay payment: ' . $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json(['success' => false, 'error' => $captureResult['error'] ?? 'Capture failed.'], 400);
     }
 
     /**
-     * Razorpay Signature Verification.
+     * Razorpay Signature Verification & Instant Plan Activation.
      */
     public function verifyRazorpay(Request $request): JsonResponse
     {
@@ -291,8 +303,18 @@ class PaymentController extends Controller
             return response()->json(['success' => false, 'error' => 'Order not found.'], 404);
         }
 
+        if ($order->status === 'completed') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment already completed!',
+                'redirect_url' => url('/dashboard?payment_success=true&order=' . $order->order_number)
+            ]);
+        }
+
+        $orderId = $validated['razorpay_order_id'] ?? $order->gateway_order_id;
+
         $isValid = $this->razorpay->verifySignature(
-            $validated['razorpay_order_id'],
+            $orderId,
             $validated['razorpay_payment_id'],
             $validated['razorpay_signature'] ?? ''
         );
@@ -300,43 +322,161 @@ class PaymentController extends Controller
         if ($isValid) {
             $order->gateway_payment_id = $validated['razorpay_payment_id'];
             $order->gateway_signature = $validated['razorpay_signature'] ?? null;
+            if (!empty($orderId)) {
+                $order->gateway_order_id = $orderId;
+            }
+            
+            $meta = $order->metadata ?? [];
+            $meta['verification'] = [
+                'timestamp' => now()->toIso8601String(),
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ];
+            $order->metadata = $meta;
+
             $this->completeOrder($order);
+
+            Log::info('[SAAS_PAYMENT_VERIFIED]', [
+                'order_number' => $order->order_number,
+                'payment_id' => $validated['razorpay_payment_id'],
+                'plan' => $order->plan,
+                'amount' => $order->amount,
+                'currency' => $order->currency,
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payment verified successfully!',
+                'message' => 'Payment verified successfully! Your subscription is active.',
+                'order_number' => $order->order_number,
+                'transaction_ref' => $order->gateway_payment_id,
                 'redirect_url' => url('/dashboard?payment_success=true&order=' . $order->order_number)
             ]);
         }
 
-        return response()->json(['success' => false, 'error' => 'Invalid payment signature.'], 400);
+        Log::error('[SAAS_RAZORPAY_SIGNATURE_FAILED]', [
+            'order_number' => $order->order_number,
+            'razorpay_order_id' => $orderId,
+            'razorpay_payment_id' => $validated['razorpay_payment_id'],
+        ]);
+
+        $order->status = 'failed';
+        $order->save();
+
+        return response()->json(['success' => false, 'error' => 'Payment signature verification failed.'], 400);
     }
 
     /**
-     * Submit Direct UPI UTR Reference.
+     * Razorpay Server-to-Server Webhook Endpoint for SaaS Subscriptions.
      */
-    public function submitUpiPayment(Request $request): JsonResponse
+    public function handleWebhook(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'order_number' => 'required|string',
-            'utr' => 'required|string|min:6|max:30'
+        $signature = $request->header('X-Razorpay-Signature');
+        $rawPayload = $request->getContent();
+
+        Log::info('[SAAS_RAZORPAY_WEBHOOK_RECEIVED]', [
+            'event' => $request->input('event'),
+            'has_signature' => !empty($signature),
         ]);
 
-        $order = Order::where('order_number', $validated['order_number'])->first();
-        if (!$order) {
-            return response()->json(['success' => false, 'error' => 'Order not found.'], 404);
+        if (!empty($signature)) {
+            $isValid = $this->razorpay->verifyWebhookSignature($rawPayload, $signature);
+            if (!$isValid) {
+                Log::warning('[SAAS_RAZORPAY_WEBHOOK_SIGNATURE_INVALID]', [
+                    'signature' => $signature,
+                ]);
+                return response()->json(['error' => 'Invalid webhook signature'], 400);
+            }
         }
 
-        $order->gateway_payment_id = $validated['utr'];
-        $order->metadata = array_merge($order->metadata ?? [], ['utr_submitted' => $validated['utr'], 'submitted_at' => now()->toDateTimeString()]);
-        
-        // Auto-approve for testing or mark as completed
-        $this->completeOrder($order);
+        $event = $request->input('event');
+        $payload = $request->input('payload', []);
+
+        if (in_array($event, ['payment.captured', 'order.paid'])) {
+            $paymentEntity = $payload['payment']['entity'] ?? [];
+            $orderEntity = $payload['order']['entity'] ?? [];
+
+            $razorpayOrderId = $paymentEntity['order_id'] ?? ($orderEntity['id'] ?? null);
+            $paymentId = $paymentEntity['id'] ?? null;
+            $receipt = $orderEntity['receipt'] ?? ($paymentEntity['notes']['order_number'] ?? null);
+
+            $order = null;
+            if ($razorpayOrderId) {
+                $order = Order::where('gateway_order_id', $razorpayOrderId)->first();
+            }
+            if (!$order && $receipt) {
+                $order = Order::where('order_number', $receipt)->first();
+            }
+
+            if ($order && $order->status !== 'completed') {
+                $order->gateway_payment_id = $paymentId ?? $order->gateway_payment_id;
+                $this->completeOrder($order);
+
+                Log::info('[SAAS_RAZORPAY_WEBHOOK_COMPLETED]', [
+                    'order_number' => $order->order_number,
+                    'payment_id' => $paymentId,
+                ]);
+            }
+        } elseif ($event === 'payment.failed') {
+            $paymentEntity = $payload['payment']['entity'] ?? [];
+            $razorpayOrderId = $paymentEntity['order_id'] ?? null;
+            $paymentId = $paymentEntity['id'] ?? null;
+
+            if ($razorpayOrderId) {
+                $order = Order::where('gateway_order_id', $razorpayOrderId)->first();
+                if ($order && $order->status !== 'completed') {
+                    $order->status = 'failed';
+                    $order->gateway_payment_id = $paymentId ?? $order->gateway_payment_id;
+                    $order->save();
+
+                    Log::warning('[SAAS_RAZORPAY_WEBHOOK_FAILED]', [
+                        'order_number' => $order->order_number,
+                        'payment_id' => $paymentId,
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['status' => 'ok', 'event' => $event]);
+    }
+
+    /**
+     * Record Client-Side Payment Failure / Dismissal.
+     */
+    public function recordPaymentFailure(Request $request): JsonResponse
+    {
+        $orderNumber = $request->input('order_number');
+        $errorCode = $request->input('error_code', 'PAYMENT_FAILED');
+        $errorDescription = $request->input('error_description', 'Payment process was cancelled or failed by user/bank.');
+        $paymentId = $request->input('payment_id');
+
+        Log::warning('[SAAS_PAYMENT_FAILURE_REPORTED]', [
+            'order_number' => $orderNumber,
+            'error_code' => $errorCode,
+            'error_description' => $errorDescription,
+            'payment_id' => $paymentId,
+            'ip' => $request->ip(),
+        ]);
+
+        if ($orderNumber) {
+            $order = Order::where('order_number', $orderNumber)->first();
+            if ($order && $order->status !== 'completed') {
+                $order->status = 'failed';
+                $meta = $order->metadata ?? [];
+                $meta['failure'] = [
+                    'error_code' => $errorCode,
+                    'error_description' => $errorDescription,
+                    'payment_id' => $paymentId,
+                    'timestamp' => now()->toIso8601String(),
+                ];
+                $order->metadata = $meta;
+                $order->save();
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'UPI Payment UTR received and verified! Plan activated.',
-            'redirect_url' => url('/dashboard?payment_success=true&order=' . $order->order_number)
+            'logged' => true,
+            'message' => 'Payment failure logged successfully.',
         ]);
     }
 
@@ -387,7 +527,7 @@ class PaymentController extends Controller
                 $order->is_commission_credited = true;
                 $order->save();
 
-                Log::info("Affiliate Commission Credited: ₹{$commission} to Affiliate #{$affiliate->id} (Code: {$affiliate->affiliate_code}) for Order #{$order->order_number}");
+                Log::info("Affiliate Commission Credited: {$order->currency} {$commission} to Affiliate #{$affiliate->id} (Code: {$affiliate->affiliate_code}) for Order #{$order->order_number}");
             }
         }
     }

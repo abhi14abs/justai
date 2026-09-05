@@ -2,20 +2,29 @@
 @php
     $form = $invitation->rsvpForm;
     $guest = $guest ?? null;
+    $content = $section->content ?? [];
+    $settings = $section->settings ?? [];
+
+    // Section Custom Card Styling Overrides
+    $cardStyleAttr = '';
+    if (!empty($settings['card_bg_color'])) $cardStyleAttr .= 'background-color: ' . $settings['card_bg_color'] . ' !important; ';
+    if (!empty($settings['card_border_color'])) $cardStyleAttr .= 'border-color: ' . $settings['card_border_color'] . ' !important; ';
+    if (!empty($settings['card_text_color'])) $cardStyleAttr .= 'color: ' . $settings['card_text_color'] . ' !important; ';
+    if (!empty($settings['bg_image'])) $cardStyleAttr .= 'background-image: url(' . $settings['bg_image'] . '); background-size: cover; background-position: center; ';
 @endphp
 
-<section class="invitation-section" id="section-rsvp">
+<section class="invitation-section" id="section-rsvp" data-section-type="rsvp">
     <div style="text-align: center; margin-bottom: 28px;">
         <div style="font-size: 11px; letter-spacing: 0.18em; color: var(--invite-primary, #D4AF37); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">
-            ✦ {{ $section->title ?? 'Kindly Respond' }} ✦
+            ✦ <span class="sec-title-display">{{ $section->title ?? 'Kindly Respond' }}</span> ✦
         </div>
         <h2 style="font-family: var(--font-serif-lux); font-size: 26px; color: var(--invite-heading, #FFFFFF); margin: 0; font-weight: 700;">
-            {{ $section->subtitle ?? 'Please Confirm Your Attendance' }}
+            <span class="sec-subtitle-display">{{ $section->subtitle ?? 'Please Confirm Your Attendance' }}</span>
         </h2>
     </div>
 
     @if($form && $form->is_active)
-    <div id="rsvp-form-container" class="glass-panel gold-foil-border" style="padding: 28px 24px; border-radius: 24px; background: var(--invite-card-bg, rgba(11, 17, 30, 0.85)); border: 1px solid var(--invite-card-border, rgba(212, 175, 55, 0.3)); box-shadow: 0 15px 35px rgba(0,0,0,0.12);">
+    <div id="rsvp-form-container" class="glass-panel gold-foil-border {{ $settings['card_style'] ?? '' }}" style="padding: 28px 24px; border-radius: 24px; background: var(--invite-card-bg, rgba(11, 17, 30, 0.85)); border: 1px solid var(--invite-card-border, rgba(212, 175, 55, 0.3)); box-shadow: 0 15px 35px rgba(0,0,0,0.12); {{ $cardStyleAttr }}">
         
         @if($guest)
         <div style="background: var(--invite-pill-bg, rgba(212, 175, 55, 0.15)); border: 1px solid var(--invite-card-border, rgba(212, 175, 55, 0.4)); padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; color: var(--invite-heading, #FFF); display: flex; align-items: center; gap: 8px;">

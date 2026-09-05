@@ -252,6 +252,14 @@
 @section('scripts')
 <script>
     let currentCurrency = 'INR';
+    try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const isIndia = tz.includes('Calcutta') || tz.includes('Kolkata') || tz.includes('India');
+        if (!isIndia) {
+            currentCurrency = 'USD';
+        }
+    } catch (e) {}
+
     let currentBilling = 'monthly';
     let currentDiscount = 50; // default launch discount
 
@@ -333,6 +341,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('curr-inr')?.classList.toggle('active', currentCurrency === 'INR');
+        document.getElementById('curr-usd')?.classList.toggle('active', currentCurrency === 'USD');
         renderPricing();
     });
 </script>

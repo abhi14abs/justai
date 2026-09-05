@@ -1,17 +1,29 @@
 {{-- Multi-Event Celebration Itinerary Section --}}
-<section class="invitation-section" id="section-events">
+@php
+    $content = $section->content ?? [];
+    $settings = $section->settings ?? [];
+
+    // Section Custom Card Styling Overrides
+    $cardStyleAttr = '';
+    if (!empty($settings['card_bg_color'])) $cardStyleAttr .= 'background-color: ' . $settings['card_bg_color'] . ' !important; ';
+    if (!empty($settings['card_border_color'])) $cardStyleAttr .= 'border-color: ' . $settings['card_border_color'] . ' !important; ';
+    if (!empty($settings['card_text_color'])) $cardStyleAttr .= 'color: ' . $settings['card_text_color'] . ' !important; ';
+    if (!empty($settings['bg_image'])) $cardStyleAttr .= 'background-image: url(' . $settings['bg_image'] . '); background-size: cover; background-position: center; ';
+@endphp
+
+<section class="invitation-section" id="section-events" data-section-type="events">
     <div style="text-align: center; margin-bottom: 32px;">
         <div style="font-size: 11px; letter-spacing: 0.18em; color: var(--invite-primary, #D4AF37); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">
-            ✦ {{ $section->title ?? 'Celebration Itinerary' }} ✦
+            ✦ <span class="sec-title-display">{{ $section->title ?? 'Celebration Itinerary' }}</span> ✦
         </div>
         <h2 style="font-family: var(--font-serif-lux); font-size: 26px; color: var(--invite-heading, #FFFFFF); margin: 0; font-weight: 700;">
-            {{ $section->subtitle ?? 'Sacred Ceremonies & Celebrations' }}
+            <span class="sec-subtitle-display">{{ $section->subtitle ?? 'Sacred Ceremonies & Celebrations' }}</span>
         </h2>
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 16px;">
         @forelse($invitation->events as $event)
-        <div class="event-card gold-foil-border">
+        <div class="event-card gold-foil-border {{ $settings['card_style'] ?? '' }}" id="event-card-{{ $event->id }}" style="{{ $cardStyleAttr }}">
             
             {{-- Header: Icon, Title & Date --}}
             <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
@@ -60,8 +72,8 @@
 
             {{-- Actions: Map Link & Add to Calendar --}}
             <div style="display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--invite-card-border, rgba(255, 255, 255, 0.08)); padding-top: 14px; margin-top: 12px;">
-                @if($event->venue_address || $event->map_embed_url)
-                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode(($event->venue_name ?? '') . ' ' . ($event->venue_address ?? '')) }}" target="_blank" class="btn-secondary" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; flex: 1; text-align: center; text-decoration: none;">
+                @if($event->venue_address || $event->venue_name || $event->map_embed_url)
+                <a href="{{ $event->map_embed_url ?: ('https://www.google.com/maps/search/?api=1&query=' . urlencode(($event->venue_name ?? '') . ' ' . ($event->venue_address ?? ''))) }}" target="_blank" class="btn-secondary" style="font-size: 11px; padding: 6px 12px; border-radius: 8px; flex: 1; text-align: center; text-decoration: none;">
                     🗺️ Get Directions
                 </a>
                 @endif

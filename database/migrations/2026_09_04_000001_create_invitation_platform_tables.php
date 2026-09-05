@@ -141,6 +141,7 @@ return new class extends Migration
             $table->string('og_image_url')->nullable();
             $table->json('selected_features')->nullable(); // array of enabled feature codes
             $table->timestamp('expires_at')->nullable();
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['user_id', 'status']);

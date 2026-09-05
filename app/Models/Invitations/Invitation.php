@@ -39,11 +39,13 @@ class Invitation extends Model
         'og_image_url',
         'selected_features',
         'expires_at',
+        'published_at',
     ];
 
     protected $casts = [
         'event_date' => 'datetime',
         'expires_at' => 'datetime',
+        'published_at' => 'datetime',
         'music_autoplay' => 'boolean',
         'selected_features' => 'array',
     ];
@@ -135,6 +137,22 @@ class Invitation extends Model
         return $this->status === 'published';
     }
 
+    /**
+     * Safely mark the invitation as published.
+     */
+    public function markAsPublished(): bool
+    {
+        $this->status = 'published';
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasColumn($this->getTable(), 'published_at')) {
+                $this->published_at = $this->published_at ?? now();
+            }
+        } catch (\Throwable $e) {
+            // Ignore schema column checks in case of driver restrictions
+        }
+        return $this->save();
+    }
+
     public function hasFeature(string $featureCode): bool
     {
         $features = $this->selected_features ?? [];
@@ -152,5 +170,18 @@ class Invitation extends Model
     public function getGuestUrl(string $guestCode): string
     {
         return $this->getPublicUrl() . '?g=' . urlencode($guestCode);
+    }
+
+    public function getBgOpacityAttribute(): float
+    {
+        if (!empty($this->custom_css) && preg_match('/--invite-bg-opacity:\s*([0-9.]+)/i', $this->custom_css, $m)) {
+            return (float) $m[1];
+        }
+        return 0.45;
+    }
+
+    public function getBgOpacityPercentAttribute(): int
+    {
+        return (int) round($this->bg_opacity * 100);
     }
 }

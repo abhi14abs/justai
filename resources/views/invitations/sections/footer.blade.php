@@ -1,13 +1,24 @@
 {{-- Footer Section --}}
-<footer class="invitation-section" id="section-footer" style="text-align: center; border-bottom: none; padding-bottom: 80px;">
+@php
+    $content = $section->content ?? [];
+    $settings = $section->settings ?? [];
+
+    // Section Custom Card Styling Overrides
+    $cardStyleAttr = '';
+    if (!empty($settings['card_bg_color'])) $cardStyleAttr .= 'background-color: ' . $settings['card_bg_color'] . ' !important; ';
+    if (!empty($settings['card_border_color'])) $cardStyleAttr .= 'border-color: ' . $settings['card_border_color'] . ' !important; ';
+    if (!empty($settings['card_text_color'])) $cardStyleAttr .= 'color: ' . $settings['card_text_color'] . ' !important; ';
+@endphp
+
+<footer class="invitation-section" id="section-footer" data-section-type="footer" style="text-align: center; border-bottom: none; padding-bottom: 80px;">
     <div style="font-size: 28px; margin-bottom: 12px;">✨</div>
     
     <h3 style="font-family: var(--font-serif-lux); font-size: 20px; color: var(--gold-primary); margin-bottom: 6px; font-weight: 700;">
-        {{ $section->title ?? '#PriyaWedsRahul2026' }}
+        <span class="sec-title-display">{{ $section->title ?? '#PriyaWedsRahul2026' }}</span>
     </h3>
 
-    <p style="font-size: 13px; color: #94A3B8; margin-bottom: 24px;">
-        {{ $section->subtitle ?? 'We eagerly look forward to celebrating our special day with you.' }}
+    <p style="font-size: 13px; color: var(--invite-text-muted, #94A3B8); margin-bottom: 24px;">
+        <span class="sec-subtitle-display">{{ $section->subtitle ?? 'We eagerly look forward to celebrating our special day with you.' }}</span>
     </p>
 
     {{-- Share on WhatsApp / Socials --}}
